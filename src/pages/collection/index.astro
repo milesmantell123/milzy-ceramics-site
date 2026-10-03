@@ -1,0 +1,90 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import PieceCard from '../../components/PieceCard.astro';
+import { products, categories } from '../../data/products';
+
+const groups = categories
+  .map((c) => ({
+    name: c,
+    id: c.toLowerCase().replace(/\s+/g, '-'),
+    pieces: products.filter((p) => p.category === c),
+  }))
+  .filter((g) => g.pieces.length);
+---
+
+<Base
+  title="The Collection"
+  description="Fifteen soda fired stoneware pieces: vases, faceted mugs and cups, bowls, lidded jars and objects. Each one of one, made by hand in Southern California."
+>
+  <PageHead
+    eyebrow="The collection"
+    title="One of one"
+    lede="Each piece below exists once. When it finds a home, it is gone, and the next kiln brings something new."
+  />
+
+  <nav class="wrap filters" aria-label="Categories">
+    {groups.map((g) => <a href={`#${g.id}`} class="eyebrow">{g.name}</a>)}
+  </nav>
+
+  {
+    groups.map((g) => (
+      <section id={g.id} class="group">
+        <div class="wrap">
+          <div class="group__head reveal">
+            <h2 class="title">{g.name}</h2>
+            <p class="eyebrow">{g.pieces.length} {g.pieces.length === 1 ? 'piece' : 'pieces'}</p>
+          </div>
+          <div class="grid">
+            {g.pieces.map((p) => (
+              <div class="reveal">
+                <PieceCard piece={p} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .filters a:hover {
+    color: var(--ink);
+  }
+  .group {
+    padding: clamp(4rem, 9vw, 7rem) 0 0;
+    scroll-margin-top: 2rem;
+  }
+  .group:last-of-type {
+    padding-bottom: clamp(5rem, 12vw, 10rem);
+  }
+  .group__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4rem clamp(1.25rem, 2.5vw, 2.5rem);
+  }
+  @media (max-width: 960px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 520px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

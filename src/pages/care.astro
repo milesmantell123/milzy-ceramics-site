@@ -1,0 +1,140 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { ETSY_SHOP } from '../data/products';
+
+const faqs = [
+  {
+    q: 'How should I wash my piece?',
+    a: 'Hand washing in warm, soapy water is the best way to keep a handmade piece at its best. Avoid abrasive scourers on glazed and flashed surfaces.',
+  },
+  {
+    q: 'Can it go in the dishwasher or microwave?',
+    a: 'Cone 10 stoneware is durable, but every handmade piece is different. Please check the listing for your piece or ask the studio before using a dishwasher or microwave.',
+  },
+  {
+    q: 'Can I pour boiling water into it?',
+    a: 'Yes, as with any stoneware mug. What to avoid is sudden extremes: do not move a piece directly from the freezer or fridge to a hot oven, stovetop or open flame.',
+  },
+  {
+    q: 'Why is my piece different from the photograph?',
+    a: 'Every piece is one of one, and soda firing never repeats itself. The photograph shows your exact piece; colour can vary slightly between screens.',
+  },
+  {
+    q: 'Can vases hold water?',
+    a: 'Yes. Stoneware fired to cone 10 is dense and resistant to water. If you notice any moisture beneath a vase, contact the studio.',
+  },
+  {
+    q: 'How are pieces shipped?',
+    a: 'Orders are packed by hand in the studio in Southern California and shipped through Etsy, with tracking. Buyers regularly mention how quickly their pieces arrive.',
+  },
+  {
+    q: 'What if something arrives damaged?',
+    a: 'Contact the studio through Etsy with a photograph and it will be put right. See the Etsy shop for the full policy.',
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+
+<Base
+  title="Care and Questions"
+  description="How to care for handmade soda fired stoneware, plus answers on washing, shipping and why every piece is unique."
+  schema={schema}
+>
+  <PageHead
+    eyebrow="Care"
+    title="Made to be used"
+    lede="Handmade stoneware is meant for daily life. A little care keeps it beautiful for generations."
+  />
+
+  <section class="wrap faq">
+    {
+      faqs.map((f) => (
+        <details class="faq__item">
+          <summary>
+            <span>{f.q}</span>
+            <span class="faq__icon" aria-hidden="true" />
+          </summary>
+          <p>{f.a}</p>
+        </details>
+      ))
+    }
+    <p class="faq__more">
+      Something else? <a href="/contact/" class="link">Ask the studio</a>
+      <a href={ETSY_SHOP} class="link" rel="noopener">Shop policies on Etsy</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .faq {
+    max-width: 56rem;
+    margin-left: 0;
+    padding-bottom: clamp(5rem, 12vw, 10rem);
+  }
+  .faq__item {
+    border-top: 1px solid var(--line);
+  }
+  .faq__item:last-of-type {
+    border-bottom: 1px solid var(--line);
+  }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem 0;
+    font-family: var(--serif);
+    font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+    line-height: 1.25;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq__icon {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    flex: none;
+  }
+  .faq__icon::before,
+  .faq__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: currentColor;
+    transition: transform 0.3s ease;
+  }
+  .faq__icon::after {
+    transform: rotate(90deg);
+  }
+  details[open] .faq__icon::after {
+    transform: rotate(0);
+  }
+  .faq__item p {
+    max-width: 40rem;
+    color: var(--stone);
+    padding-bottom: 1.5rem;
+  }
+  .faq__more {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem 2.5rem;
+    margin-top: 3rem;
+  }
+</style>

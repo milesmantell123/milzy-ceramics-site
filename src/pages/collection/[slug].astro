@@ -1,0 +1,175 @@
+---
+import Base from '../../layouts/Base.astro';
+import Plate from '../../components/Plate.astro';
+import PieceCard from '../../components/PieceCard.astro';
+import { products, formatPrice, type Product } from '../../data/products';
+
+export function getStaticPaths() {
+  return products.map((piece) => ({ params: { slug: piece.slug }, props: { piece } }));
+}
+
+const { piece } = Astro.props as { piece: Product };
+const related = products
+  .filter((p) => p.slug !== piece.slug && p.category === piece.category)
+  .concat(products.filter((p) => p.slug !== piece.slug && p.category !== piece.category))
+  .slice(0, 3);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: `${piece.name}, ${piece.finish}`,
+  description: piece.description,
+  sku: `MILZY-${piece.number}`,
+  brand: { '@type': 'Brand', name: 'Milzy Ceramics' },
+  material: 'Stoneware',
+  ...(piece.image ? { image: new URL(piece.image, Astro.site).href } : {}),
+  offers: {
+    '@type': 'Offer',
+    price: piece.price.toFixed(2),
+    priceCurrency: 'USD',
+    availability: 'https://schema.org/InStock',
+    url: piece.etsy,
+  },
+};
+---
+
+<Base
+  title={`${piece.name}, ${piece.finish}`}
+  description={`${piece.description} Soda fired stoneware, handmade in Southern California. ${formatPrice(piece.price)}.`}
+  image={piece.image}
+  schema={schema}
+>
+  <article class="wrap piece">
+    <div class="piece__media">
+      <Plate piece={piece} eager />
+    </div>
+
+    <div class="piece__info">
+      <a href="/collection/" class="eyebrow back">&larr; The collection</a>
+      <p class="eyebrow">No. {piece.number} &middot; {piece.category}</p>
+      <h1 class="title">{piece.name}</h1>
+      <p class="piece__finish">{piece.finish}</p>
+      <p class="piece__price">{formatPrice(piece.price)}</p>
+
+      <p class="piece__desc">{piece.description}</p>
+
+      <a href={piece.etsy} class="button button--solid" rel="noopener">Acquire this piece</a>
+      <p class="piece__note">Purchase is completed securely through our Etsy studio.</p>
+
+      <dl class="details">
+        <div><dt>Material</dt><dd>Wheel-thrown stoneware</dd></div>
+        <div><dt>Firing</dt><dd>Soda fired to cone 10</dd></div>
+        <div><dt>Edition</dt><dd>One of one</dd></div>
+        <div><dt>Made in</dt><dd>Southern California</dd></div>
+      </dl>
+
+      <p class="piece__more">
+        <a href="/care/" class="link">Care</a>
+        <a href="/learn/soda-firing/" class="link">About soda firing</a>
+      </p>
+    </div>
+  </article>
+
+  <section class="section related">
+    <div class="wrap">
+      <h2 class="title">You may also consider</h2>
+      <div class="related__grid">
+        {related.map((p) => <PieceCard piece={p} />)}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .piece {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: clamp(2.5rem, 7vw, 7rem);
+    padding-top: clamp(8rem, 12vw, 10rem);
+    padding-bottom: clamp(4rem, 8vw, 7rem);
+    align-items: start;
+  }
+  .piece__info {
+    position: sticky;
+    top: 3rem;
+    padding-top: 2rem;
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: 3rem;
+  }
+  .piece__info > .eyebrow:not(.back) {
+    margin-bottom: 1.25rem;
+  }
+  .piece__finish {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.4rem;
+    margin: 0.75rem 0 1.5rem;
+    color: var(--stone);
+  }
+  .piece__price {
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 2.5rem;
+  }
+  .piece__desc {
+    margin-bottom: 2.5rem;
+    max-width: 30rem;
+  }
+  .piece__note {
+    font-size: 0.8rem;
+    color: var(--stone);
+    margin: 1rem 0 3rem;
+  }
+  .details {
+    margin: 0 0 2.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .details div {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.9rem;
+  }
+  .details dt {
+    color: var(--stone);
+  }
+  .details dd {
+    margin: 0;
+  }
+  .piece__more {
+    display: flex;
+    gap: 2rem;
+  }
+  .related {
+    border-top: 1px solid var(--line);
+  }
+  .related .title {
+    margin-bottom: 3.5rem;
+  }
+  .related__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.25rem, 2.5vw, 2.5rem);
+  }
+  @media (max-width: 860px) {
+    .piece {
+      grid-template-columns: 1fr;
+    }
+    .piece__info {
+      position: static;
+      padding-top: 0;
+    }
+    .back {
+      margin-bottom: 2rem;
+    }
+    .related__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .related__grid > :global(:nth-child(3)) {
+      display: none;
+    }
+  }
+</style>

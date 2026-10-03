@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { ETSY_SHOP } from '../data/products';
+---
+
+<Base
+  title="Commissions and Contact"
+  description="Commission a set, a larger vessel or a piece for a particular space from Milzy Ceramics."
+>
+  <PageHead
+    eyebrow="Contact"
+    title="Private requests"
+    lede="The studio accepts a small number of commissions: dinnerware and cup sets, larger vessels, and pieces made for a particular room, table or gift."
+  />
+
+  <section class="wrap contact">
+    <ol class="steps">
+      <li>
+        <span>I</span>
+        <div>
+          <h2>Conversation</h2>
+          <p>Share what you have in mind: the piece, the space, the colours you are drawn to, and any timing.</p>
+        </div>
+      </li>
+      <li>
+        <span>II</span>
+        <div>
+          <h2>Proposal</h2>
+          <p>You receive a note on form, size and price. Soda firing means colour is guided, never guaranteed, and that is part of the work.</p>
+        </div>
+      </li>
+      <li>
+        <span>III</span>
+        <div>
+          <h2>Making</h2>
+          <p>Your pieces are thrown, faceted and fired in the next suitable kiln, then packed by hand and shipped to you.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="contact__cta">
+      <a href={ETSY_SHOP} class="button button--solid" rel="noopener">Message the studio</a>
+      <p>Messages are answered personally, through the studio&rsquo;s Etsy account.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact {
+    padding-bottom: clamp(5rem, 12vw, 10rem);
+  }
+  .steps {
+    list-style: none;
+    margin: 0 0 5rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(2rem, 5vw, 5rem);
+  }
+  .steps li {
+    border-top: 1px solid var(--ink);
+    padding-top: 2rem;
+  }
+  .steps span {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.4rem;
+    color: var(--rust);
+  }
+  .steps h2 {
+    font-size: 2.25rem;
+    margin: 1.25rem 0 1rem;
+  }
+  .steps p {
+    color: var(--stone);
+  }
+  .contact__cta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .contact__cta p {
+    margin: 0;
+    color: var(--stone);
+    font-size: 0.9rem;
+  }
+  @media (max-width: 860px) {
+    .steps {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import { articles } from '../../data/articles';
+---
+
+<Base
+  title="Learn"
+  description="Essays on soda firing, faceting, stoneware and the making of handmade pottery, from the Milzy Ceramics studio."
+>
+  <PageHead
+    eyebrow="Learn"
+    title="On making"
+    lede="Short essays from the studio on how these pieces come to be: the clay, the cut, and the fire."
+  />
+
+  <section class="wrap list">
+    {
+      articles.map((a, i) => (
+        <a href={`/learn/${a.slug}/`} class="item reveal">
+          <span class="item__no">0{i + 1}</span>
+          <div>
+            <p class="eyebrow">{a.subtitle}</p>
+            <h2 class="item__title">{a.title}</h2>
+            <p class="item__sum">{a.summary}</p>
+          </div>
+          <span class="item__read eyebrow">{a.minutes} min</span>
+        </a>
+      ))
+    }
+  </section>
+</Base>
+
+<style>
+  .list {
+    padding-bottom: clamp(5rem, 12vw, 10rem);
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 6rem 1fr auto;
+    gap: 2rem;
+    padding: 3rem 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .item:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .item__no {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--rust);
+  }
+  .item__title {
+    font-size: clamp(2.25rem, 4.5vw, 3.75rem);
+    margin: 0.75rem 0 1rem;
+    transition: color 0.3s ease;
+  }
+  .item:hover .item__title {
+    color: var(--rust);
+  }
+  .item__sum {
+    max-width: 38rem;
+    color: var(--stone);
+    margin: 0;
+  }
+  @media (max-width: 640px) {
+    .item {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+    .item__read {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,81 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+---
+
+<Base
+  title="The Studio"
+  description="Milzy Ceramics is a small studio in Southern California making wheel-thrown, faceted, soda fired stoneware."
+>
+  <PageHead
+    eyebrow="The studio"
+    title="Made slowly, finished by fire"
+  />
+
+  <section class="wrap studio">
+    <!-- Replace this panel with a portrait or studio photograph: public/images/studio.jpg -->
+    <div class="studio__image" role="img" aria-label="The Milzy Ceramics studio"></div>
+
+    <div class="studio__text prose">
+      <p class="lede">
+        Milzy Ceramics is a one-person studio in Southern California, devoted to a single way of
+        working: wheel-thrown stoneware, often faceted by hand, and finished in the soda kiln.
+      </p>
+      <p>
+        Every piece begins on the wheel. Many are cut into facets while the clay is still soft,
+        giving the fire edges to find. Glaze is used sparingly, in places, so that bare clay
+        is left for the soda to colour. Then the work goes into the kiln and is fired to cone 10.
+      </p>
+      <blockquote>&ldquo;Half me, half accident.&rdquo;</blockquote>
+      <p>
+        That is the honest description of every piece here. The form, the cuts and the glaze
+        are decisions. The rust, the flashing and the drips are the fire&rsquo;s reply. No piece
+        is repeated, and nothing is made in batches to a template.
+      </p>
+      <p>
+        The studio has shared its work through Etsy since 2021, where every review to date has
+        been five stars.
+      </p>
+      <p class="actions">
+        <a href="/collection/" class="button button--solid">View the collection</a>
+        <a href="/learn/soda-firing/" class="link">How soda firing works</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .studio {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2.5rem, 7vw, 7rem);
+    padding-bottom: clamp(5rem, 12vw, 10rem);
+    align-items: start;
+  }
+  .studio__image {
+    aspect-ratio: 4 / 5;
+    background:
+      radial-gradient(ellipse 50% 40% at 60% 70%, rgba(180, 83, 42, 0.6) 0%, transparent 70%),
+      linear-gradient(160deg, #2a2522 0%, #161412 100%);
+    position: sticky;
+    top: 3rem;
+  }
+  .studio__text .lede {
+    margin-bottom: 2rem;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    margin-top: 3rem;
+  }
+  @media (max-width: 860px) {
+    .studio {
+      grid-template-columns: 1fr;
+    }
+    .studio__image {
+      position: static;
+    }
+  }
+</style>
