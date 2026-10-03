@@ -7,8 +7,22 @@ interface Props {
   piece: Product;
   eager?: boolean;
   ratio?: string;
+  // Which photograph to show; defaults to the cover.
+  index?: number;
+  sizes?: string;
 }
-const { piece, eager = false, ratio = '4 / 5' } = Astro.props;
+const {
+  piece,
+  eager = false,
+  ratio = '4 / 5',
+  index = 0,
+  sizes = '(max-width: 520px) 100vw, (max-width: 960px) 50vw, 33vw',
+} = Astro.props;
+const image = piece.images?.[index];
+// Etsy serves each photo at several widths; let the browser pick.
+const srcset = image?.includes('il_1080xN')
+  ? `${image.replace('il_1080xN', 'il_794xN')} 794w, ${image} 1080w`
+  : undefined;
 const [rust, glaze] = piece.tones;
 const id = `g-${piece.slug}`;
 
@@ -29,9 +43,11 @@ const path = piece.form ? forms[piece.form] : shapes[piece.category];
 
 <div class="plate" style={`aspect-ratio:${ratio}`}>
   {
-    piece.image ? (
+    image ? (
       <img
-        src={piece.image}
+        src={image}
+        srcset={srcset}
+        sizes={srcset ? sizes : undefined}
         alt={`${piece.name}, ${piece.finish.toLowerCase()}`}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
@@ -58,7 +74,7 @@ const path = piece.form ? forms[piece.form] : shapes[piece.category];
       </svg>
     )
   }
-  {!piece.image && <span class="plate__no">No. {piece.number}</span>}
+  {!image && <span class="plate__no">No. {piece.number}</span>}
 </div>
 
 <style>
