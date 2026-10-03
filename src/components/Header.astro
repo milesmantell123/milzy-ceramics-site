@@ -1,0 +1,154 @@
+---
+interface Props {
+  dark?: boolean;
+}
+const { dark = false } = Astro.props;
+
+const links = [
+  { href: '/collection/', label: 'Collection' },
+  { href: '/learn/', label: 'Learn' },
+  { href: '/studio/', label: 'The Studio' },
+  { href: '/care/', label: 'Care' },
+  { href: '/contact/', label: 'Contact' },
+];
+const path = Astro.url.pathname;
+---
+
+<header class:list={['header', { 'header--dark': dark }]}>
+  <div class="wrap header__inner">
+    <a href="/" class="wordmark" aria-label="Milzy Ceramics, home">
+      Milzy<span>Ceramics</span>
+    </a>
+    <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav">
+      <span class="visually-hidden">Menu</span>
+      <span class="bar"></span><span class="bar"></span>
+    </button>
+    <nav id="site-nav" class="nav" aria-label="Main">
+      {
+        links.map((l) => (
+          <a href={l.href} aria-current={path.startsWith(l.href) ? 'page' : undefined}>
+            {l.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.menu-toggle');
+  const header = document.querySelector('.header');
+  btn?.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!open));
+    header?.classList.toggle('is-open', !open);
+  });
+</script>
+
+<style>
+  .header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    color: var(--ink);
+  }
+  .header--dark {
+    color: var(--ivory);
+  }
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 6rem;
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 400;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .wordmark span {
+    font-family: var(--sans);
+    font-size: 0.55rem;
+    font-weight: 400;
+    letter-spacing: 0.6em;
+    margin-top: 0.45rem;
+    opacity: 0.75;
+  }
+  .nav {
+    display: flex;
+    gap: 2.5rem;
+  }
+  .nav a {
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  .nav a:hover,
+  .nav a[aria-current='page'] {
+    border-color: currentColor;
+  }
+  .menu-toggle {
+    display: none;
+  }
+
+  @media (max-width: 860px) {
+    .menu-toggle {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      background: none;
+      border: 0;
+      padding: 0.75rem 0 0.75rem 0.75rem;
+      cursor: pointer;
+      color: inherit;
+    }
+    .bar {
+      display: block;
+      width: 26px;
+      height: 1px;
+      background: currentColor;
+      transition: transform 0.3s ease;
+    }
+    .header.is-open .bar:first-of-type {
+      transform: translateY(4px) rotate(45deg);
+    }
+    .header.is-open .bar:last-of-type {
+      transform: translateY(-4px) rotate(-45deg);
+    }
+    .nav {
+      display: none;
+    }
+    .header.is-open {
+      position: fixed;
+      inset: 0;
+      background: var(--ink);
+      color: var(--ivory);
+    }
+    .header.is-open .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      position: absolute;
+      top: 8rem;
+      left: var(--gutter);
+    }
+    .header.is-open .nav a {
+      font-family: var(--serif);
+      font-size: 2.25rem;
+      letter-spacing: 0;
+      text-transform: none;
+      font-weight: 300;
+    }
+  }
+</style>

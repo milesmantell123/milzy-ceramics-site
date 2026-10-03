@@ -1,0 +1,89 @@
+---
+// Shows a piece's photograph, or, until one is added, a quiet drawing of
+// the form in the piece's own colours.
+import type { Product } from '../data/products';
+
+interface Props {
+  piece: Product;
+  eager?: boolean;
+  ratio?: string;
+}
+const { piece, eager = false, ratio = '4 / 5' } = Astro.props;
+const [rust, glaze] = piece.tones;
+const id = `g-${piece.slug}`;
+
+// Simple silhouettes, drawn in a 200 x 250 box with the base resting at y=200.
+const shapes: Record<string, string> = {
+  Vessels: 'M82 40 h36 v10 c0 14 -6 20 -6 32 c0 18 34 34 34 70 c0 26 -14 42 -24 48 h-44 c-10 -6 -24 -22 -24 -48 c0 -36 34 -52 34 -70 c0 -12 -6 -18 -6 -32 z',
+  Drinkware: 'M62 90 h76 l-4 104 c0 4 -3 6 -7 6 h-54 c-4 0 -7 -2 -7 -6 z M138 112 c22 0 28 12 28 26 c0 16 -10 26 -30 28 l1 -10 c14 -2 19 -8 19 -18 c0 -10 -5 -16 -18 -16 z',
+  Bowls: 'M36 120 h128 c0 40 -26 72 -50 78 c-4 1 -24 1 -28 0 c-24 -6 -50 -38 -50 -78 z',
+  'Lidded Jars': 'M92 62 h16 v8 h20 c4 0 6 2 6 6 v4 h-68 v-4 c0 -4 2 -6 6 -6 h20 z M70 84 h60 c10 18 22 38 22 64 c0 28 -14 46 -26 52 h-52 c-12 -6 -26 -24 -26 -52 c0 -26 12 -46 22 -64 z',
+  Objects: 'M44 168 c0 -14 24 -22 56 -22 c32 0 56 8 56 22 v14 c0 12 -24 18 -56 18 c-32 0 -56 -6 -56 -18 z',
+};
+const forms: Record<string, string> = {
+  cup: 'M66 104 h68 l-6 90 c0 4 -3 6 -7 6 h-42 c-4 0 -7 -2 -7 -6 z',
+  'small-cup': 'M78 140 h44 l-4 54 c0 4 -2 6 -6 6 h-24 c-4 0 -6 -2 -6 -6 z',
+};
+const path = piece.form ? forms[piece.form] : shapes[piece.category];
+---
+
+<div class="plate" style={`aspect-ratio:${ratio}`}>
+  {
+    piece.image ? (
+      <img
+        src={piece.image}
+        alt={`${piece.name}, ${piece.finish.toLowerCase()}`}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={eager ? 'high' : 'auto'}
+      />
+    ) : (
+      <svg
+        class="plate__art"
+        viewBox="0 0 200 250"
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        aria-label={`${piece.name}, ${piece.finish.toLowerCase()}`}
+      >
+        <defs>
+          <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color={glaze} />
+            <stop offset="0.55" stop-color={glaze} />
+            <stop offset="0.8" stop-color={rust} />
+            <stop offset="1" stop-color={rust} />
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="201" rx="58" ry="4" fill="rgba(22,20,18,0.12)" />
+        <path d={path} fill={`url(#${id})`} stroke="rgba(22,20,18,0.18)" stroke-width="0.75" />
+      </svg>
+    )
+  }
+  {!piece.image && <span class="plate__no">No. {piece.number}</span>}
+</div>
+
+<style>
+  .plate {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ece6db 0%, #e2dacd 100%);
+  }
+  .plate img,
+  .plate__art {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .plate__art {
+    padding: 18% 22% 8%;
+  }
+  .plate__no {
+    position: absolute;
+    left: 1.25rem;
+    bottom: 1rem;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: rgba(22, 20, 18, 0.5);
+  }
+</style>

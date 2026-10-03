@@ -1,0 +1,79 @@
+---
+import Base from './Base.astro';
+import { articles } from '../data/articles';
+
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+const article = articles.find((a) => a.slug === slug)!;
+const next = articles[(articles.indexOf(article) + 1) % articles.length];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: `${article.title}: ${article.subtitle}`,
+  description: article.summary,
+  author: { '@type': 'Organization', name: 'Milzy Ceramics' },
+  publisher: { '@type': 'Organization', name: 'Milzy Ceramics' },
+};
+---
+
+<Base title={`${article.title}: ${article.subtitle}`} description={article.summary} schema={schema}>
+  <header class="ahead">
+    <div class="wrap narrow">
+      <a href="/learn/" class="eyebrow">&larr; Learn</a>
+      <p class="eyebrow ahead__sub">{article.subtitle} &middot; {article.minutes} minute read</p>
+      <h1 class="display">{article.title}</h1>
+      <p class="lede">{article.summary}</p>
+    </div>
+  </header>
+
+  <div class="wrap narrow prose">
+    <slot />
+  </div>
+
+  <section class="section">
+    <div class="wrap narrow end">
+      <hr class="rule" />
+      <div class="end__row">
+        <div>
+          <p class="eyebrow">Continue reading</p>
+          <a href={`/learn/${next.slug}/`} class="end__next">{next.title}</a>
+        </div>
+        <a href="/collection/" class="button">See the work</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .ahead {
+    padding: clamp(10rem, 18vw, 14rem) 0 clamp(3rem, 6vw, 5rem);
+  }
+  .ahead__sub {
+    margin: 3rem 0 1.5rem;
+  }
+  .ahead .display {
+    font-size: clamp(3rem, 7vw, 5.5rem);
+  }
+  .ahead .lede {
+    margin-top: 2rem;
+    color: var(--stone);
+  }
+  .end__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    padding-top: 3rem;
+    flex-wrap: wrap;
+  }
+  .end__row .eyebrow {
+    margin-bottom: 0.75rem;
+  }
+  .end__next {
+    font-family: var(--serif);
+    font-size: 2rem;
+  }
+</style>

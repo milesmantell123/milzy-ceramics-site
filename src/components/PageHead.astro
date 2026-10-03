@@ -1,0 +1,30 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  lede?: string;
+}
+const { eyebrow, title, lede } = Astro.props;
+---
+
+<section class="pagehead">
+  <div class="wrap">
+    <p class="eyebrow">{eyebrow}</p>
+    <h1 class="display">{title}</h1>
+    {lede && <p class="lede">{lede}</p>}
+  </div>
+</section>
+
+<style>
+  .pagehead {
+    padding: clamp(10rem, 18vw, 14rem) 0 clamp(3rem, 7vw, 6rem);
+  }
+  .eyebrow {
+    margin-bottom: 2rem;
+  }
+  .lede {
+    max-width: 38rem;
+    margin: 2.5rem 0 0;
+    color: var(--stone);
+  }
+</style>

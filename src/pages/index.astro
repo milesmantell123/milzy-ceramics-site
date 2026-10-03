@@ -1,0 +1,293 @@
+---
+import Base from '../layouts/Base.astro';
+import PieceCard from '../components/PieceCard.astro';
+import { products, ETSY_SHOP } from '../data/products';
+import { reviews } from '../data/reviews';
+
+const featured = products.filter((p) => p.featured).slice(0, 4);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Milzy Ceramics',
+  url: 'https://milzyceramics.com',
+  description: 'Soda fired, wheel-thrown stoneware made by hand in Southern California.',
+  sameAs: [ETSY_SHOP],
+};
+---
+
+<Base dark schema={schema}>
+  <section class="hero">
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="wrap hero__inner">
+      <p class="eyebrow hero__eyebrow">Soda fired stoneware &middot; Southern California</p>
+      <h1 class="display hero__title">Half me.<br /><em>Half fire.</em></h1>
+      <div class="hero__foot">
+        <p class="hero__copy">
+          Each piece is thrown by hand, then handed to a kiln at cone 10, where vaporised soda
+          finishes what the hands began. No two leave the fire the same.
+        </p>
+        <a href="/collection/" class="button button--light">Discover the collection</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap intro reveal">
+      <p class="eyebrow">The house</p>
+      <p class="intro__statement">
+        &ldquo;I make pots and then hand them to the fire.&rdquo; Every vessel is wheel-thrown,
+        often faceted by hand, and soda fired to around 2,350&deg;F. The flame decides the rest:
+        where the rust blooms, where the glaze runs, where the clay is left bare.
+      </p>
+    </div>
+  </section>
+
+  <section class="section featured">
+    <div class="wrap">
+      <div class="head reveal">
+        <h2 class="title">Selected works</h2>
+        <a href="/collection/" class="link">View all fifteen</a>
+      </div>
+      <div class="featured__grid">
+        {featured.map((p) => (
+          <div class="reveal"><PieceCard piece={p} /></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="fire">
+    <div class="wrap fire__inner">
+      <div class="fire__text reveal">
+        <p class="eyebrow">Learn</p>
+        <h2 class="title">What the fire does</h2>
+        <p class="lede">
+          Soda firing is one of the least predictable ways to finish a pot, and one of the most
+          beautiful. Soda ash is introduced into the hot kiln, turns to vapour, and settles on every
+          surface the flame touches.
+        </p>
+        <a href="/learn/soda-firing/" class="button button--light">Read the essay</a>
+      </div>
+      <ol class="fire__steps reveal">
+        <li><span>I</span><p>Thrown on the wheel, then faceted while the clay is still soft.</p></li>
+        <li><span>II</span><p>Dried slowly, bisque fired, glazed in part and left bare in part.</p></li>
+        <li><span>III</span><p>Soda fired to cone 10. The flame carries sodium across the work.</p></li>
+        <li><span>IV</span><p>The kiln is opened. Every piece is now one of one.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow center reveal">In their words</p>
+      <div class="reviews">
+        {reviews.map((r) => (
+          <figure class="review reveal">
+            <blockquote>&ldquo;{r.quote}&rdquo;</blockquote>
+            <figcaption class="eyebrow">{r.name}</figcaption>
+          </figure>
+        ))}
+      </div>
+      <p class="center reviews__note eyebrow reveal">Five stars across every review on Etsy</p>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section class="section">
+    <div class="wrap closing reveal">
+      <h2 class="title">Commissions and private requests</h2>
+      <p class="lede">
+        Sets, larger vessels and pieces made for a particular room or table.
+      </p>
+      <a href="/contact/" class="button">Begin a conversation</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    background: var(--ink);
+    color: var(--ivory);
+    overflow: hidden;
+    display: flex;
+  }
+  .hero__glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 45% 55% at 78% 60%, rgba(180, 83, 42, 0.55) 0%, transparent 70%),
+      radial-gradient(ellipse 30% 35% at 82% 66%, rgba(214, 120, 60, 0.35) 0%, transparent 70%);
+    animation: breathe 9s ease-in-out infinite alternate;
+  }
+  @keyframes breathe {
+    from { opacity: 0.75; transform: scale(1); }
+    to { opacity: 1; transform: scale(1.06); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero__glow { animation: none; }
+  }
+  .hero__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 9rem;
+    padding-bottom: clamp(3rem, 8vw, 6rem);
+  }
+  .hero__eyebrow {
+    color: #a59d92;
+    margin-bottom: 2rem;
+  }
+  .hero__title em {
+    font-style: italic;
+    color: #e7a273;
+  }
+  .hero__foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 3rem;
+    margin-top: 3.5rem;
+    flex-wrap: wrap;
+  }
+  .hero__copy {
+    max-width: 30rem;
+    margin: 0;
+    color: #d9d2c6;
+  }
+
+  .intro {
+    max-width: 62rem;
+    text-align: center;
+  }
+  .intro .eyebrow {
+    margin-bottom: 2.5rem;
+  }
+  .intro__statement {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  .featured {
+    padding-top: 0;
+  }
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    margin-bottom: 4rem;
+    flex-wrap: wrap;
+  }
+  .featured__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(1.25rem, 2.5vw, 2.5rem);
+  }
+  .featured__grid > :nth-child(even) {
+    margin-top: 5rem;
+  }
+
+  .fire {
+    background: var(--ink);
+    color: var(--ivory);
+    padding: clamp(5rem, 12vw, 10rem) 0;
+  }
+  .fire .eyebrow {
+    color: #a59d92;
+    margin-bottom: 2rem;
+  }
+  .fire__inner {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(3rem, 8vw, 8rem);
+    align-items: center;
+  }
+  .fire .title {
+    margin-bottom: 2rem;
+  }
+  .fire .lede {
+    color: #d9d2c6;
+    margin-bottom: 2.5rem;
+  }
+  .fire__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .fire__steps li {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    padding: 1.75rem 0;
+    border-top: 1px solid #2f2b27;
+  }
+  .fire__steps li:last-child {
+    border-bottom: 1px solid #2f2b27;
+  }
+  .fire__steps span {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.4rem;
+    color: #e7a273;
+  }
+  .fire__steps p {
+    margin: 0;
+    color: #d9d2c6;
+  }
+
+  .center {
+    text-align: center;
+  }
+  .reviews {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    margin: 4rem 0;
+  }
+  .review {
+    margin: 0;
+    text-align: center;
+  }
+  .review blockquote {
+    font-family: var(--serif);
+    font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+    line-height: 1.4;
+    margin: 0 0 1.5rem;
+  }
+  .reviews__note {
+    margin: 0;
+  }
+
+  .closing {
+    text-align: center;
+    max-width: 44rem;
+  }
+  .closing .title {
+    margin-bottom: 1.5rem;
+  }
+  .closing .lede {
+    color: var(--stone);
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 960px) {
+    .featured__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .fire__inner,
+    .reviews {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 520px) {
+    .featured__grid > :nth-child(even) {
+      margin-top: 2.5rem;
+    }
+  }
+</style>

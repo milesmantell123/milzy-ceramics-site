@@ -1,0 +1,116 @@
+---
+import { ETSY_SHOP } from '../data/products';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <p class="footer__mark">Milzy</p>
+        <p class="footer__line">Soda fired stoneware.<br />Made by hand in Southern California.</p>
+      </div>
+
+      <nav class="footer__cols" aria-label="Footer">
+        <div>
+          <p class="eyebrow">Collection</p>
+          <a href="/collection/">All pieces</a>
+          <a href="/collection/#vessels">Vessels</a>
+          <a href="/collection/#drinkware">Drinkware</a>
+          <a href="/collection/#lidded-jars">Lidded jars</a>
+        </div>
+        <div>
+          <p class="eyebrow">Discover</p>
+          <a href="/learn/">Learn</a>
+          <a href="/studio/">The studio</a>
+          <a href="/care/">Care and questions</a>
+        </div>
+        <div>
+          <p class="eyebrow">Connect</p>
+          <a href="/contact/">Commissions</a>
+          <a href={ETSY_SHOP} rel="noopener">Etsy</a>
+        </div>
+      </nav>
+    </div>
+
+    <hr class="rule" />
+    <div class="footer__base">
+      <p>&copy; {year} Milzy Ceramics</p>
+      <p>Every piece is one of one.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--ink);
+    color: var(--ivory);
+    padding: 6rem 0 2.5rem;
+  }
+  .footer .rule {
+    border-color: #2f2b27;
+  }
+  .footer__top {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 4rem;
+    padding-bottom: 5rem;
+  }
+  .footer__mark {
+    font-family: var(--serif);
+    font-size: 3.5rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+  .footer__line {
+    color: #a59d92;
+    font-size: 0.95rem;
+  }
+  .footer__cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .footer__cols .eyebrow {
+    color: #8a8279;
+    margin-bottom: 1.25rem;
+  }
+  .footer__cols a {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+    color: #d9d2c6;
+    transition: color 0.3s ease;
+  }
+  .footer__cols a:hover {
+    color: var(--ivory);
+  }
+  .footer__base {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 2rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8a8279;
+  }
+  .footer__base p {
+    margin: 0;
+  }
+  @media (max-width: 860px) {
+    .footer__top {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 520px) {
+    .footer__cols {
+      grid-template-columns: 1fr 1fr;
+    }
+    .footer__base {
+      flex-direction: column;
+    }
+  }
+</style>

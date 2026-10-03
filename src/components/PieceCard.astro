@@ -1,0 +1,50 @@
+---
+import Plate from './Plate.astro';
+import { formatPrice, type Product } from '../data/products';
+
+interface Props {
+  piece: Product;
+}
+const { piece } = Astro.props;
+---
+
+<a href={`/collection/${piece.slug}/`} class="card">
+  <Plate piece={piece} />
+  <div class="card__meta">
+    <div>
+      <h3 class="card__name">{piece.name}</h3>
+      <p class="card__finish">{piece.finish}</p>
+    </div>
+    <p class="card__price">{formatPrice(piece.price)}</p>
+  </div>
+</a>
+
+<style>
+  .card {
+    display: block;
+  }
+  .card:hover :global(.plate img),
+  .card:hover :global(.plate__art) {
+    transform: scale(1.04);
+  }
+  .card__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding-top: 1.25rem;
+  }
+  .card__name {
+    font-size: 1.5rem;
+  }
+  .card__finish {
+    margin: 0.35rem 0 0;
+    font-size: 0.85rem;
+    color: var(--stone);
+  }
+  .card__price {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+  }
+</style>
