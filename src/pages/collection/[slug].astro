@@ -22,7 +22,7 @@ const schema = {
   sku: `MILZY-${piece.number}`,
   brand: { '@type': 'Brand', name: 'Milzy Ceramics' },
   material: 'Stoneware',
-  ...(piece.image ? { image: new URL(piece.image, Astro.site).href } : {}),
+  ...(piece.images?.length ? { image: piece.images.map((i) => new URL(i, Astro.site).href) } : {}),
   offers: {
     '@type': 'Offer',
     price: piece.price.toFixed(2),
@@ -36,12 +36,16 @@ const schema = {
 <Base
   title={`${piece.name}, ${piece.finish}`}
   description={`${piece.description} Soda fired stoneware, handmade in Southern California. ${formatPrice(piece.price)}.`}
-  image={piece.image}
+  image={piece.images?.[0]}
   schema={schema}
 >
   <article class="wrap piece">
     <div class="piece__media">
-      <Plate piece={piece} eager />
+      {
+        (piece.images?.length ? piece.images : [undefined]).map((_, i) => (
+          <Plate piece={piece} index={i} eager={i === 0} sizes="(max-width: 860px) 100vw, 55vw" />
+        ))
+      }
     </div>
 
     <div class="piece__info">
@@ -58,7 +62,8 @@ const schema = {
 
       <dl class="details">
         <div><dt>Material</dt><dd>Wheel-thrown stoneware</dd></div>
-        <div><dt>Firing</dt><dd>Soda fired to cone 10</dd></div>
+        <div><dt>Firing</dt><dd>Soda fired to cone 10, three days</dd></div>
+        {piece.specs?.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
         <div><dt>Care</dt><dd>Food, dishwasher and microwave safe</dd></div>
         <div><dt>Edition</dt><dd>One of one</dd></div>
         <div><dt>Made in</dt><dd>Southern California</dd></div>
@@ -89,6 +94,10 @@ const schema = {
     padding-top: clamp(8rem, 12vw, 10rem);
     padding-bottom: clamp(4rem, 8vw, 7rem);
     align-items: start;
+  }
+  .piece__media {
+    display: grid;
+    gap: 1rem;
   }
   .piece__info {
     position: sticky;
@@ -139,6 +148,7 @@ const schema = {
   }
   .details dd {
     margin: 0;
+    text-align: right;
   }
   .piece__more {
     display: flex;

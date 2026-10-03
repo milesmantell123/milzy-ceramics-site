@@ -22,12 +22,13 @@ npm run build    # outputs the finished site to dist/
 | Colours and type | `src/styles/global.css` |
 | Photographs | `public/images/` |
 
-### Adding a photograph to a piece
+### Photographs
 
-1. Put the photo in `public/images/`, for example `public/images/faceted-mug-04.jpg`. Aim for about 2000px on the long side, saved as JPG or WebP under 400 KB.
-2. In `src/data/products.ts`, add `image: '/images/faceted-mug-04.jpg',` to that piece.
+Each piece's `images` list in `src/data/products.ts` points at its photos on Etsy's image server, so they are the same photos as the Etsy listing. The first is the cover; the rest appear on the piece's page.
 
-Until a piece has a photo, the site shows a simple drawing of its form in its colours.
+To use your own file instead, put it in `public/images/` (about 2000px on the long side, JPG or WebP under 400 KB) and add `'/images/your-file.jpg'` to the list.
+
+A piece with no photos shows a simple drawing of its form in its colours.
 
 ## Hosting
 
