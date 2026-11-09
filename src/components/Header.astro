@@ -1,6 +1,7 @@
 ---
 // Announcement bar, main bar with the Shop menu, and a row of quick links.
 import { categories, surfaces, available, ETSY_SHOP, cover } from '../data/products';
+import Mark from './Mark.astro';
 
 const path = Astro.url.pathname;
 const messages = [
@@ -38,7 +39,7 @@ const count = (slug: string) => available.filter((p) => categories.find((c) => c
       <a href="/studio/" class="hide-sm" aria-current={path.startsWith('/studio') ? 'page' : undefined}>Our Story</a>
     </nav>
 
-    <a href="/" class="wordmark" aria-label="Milzy Ceramics, home">Milzy</a>
+    <a href="/" class="wordmark" aria-label="Milzy Ceramics, home"><Mark class="wordmark__mark" />Milzy</a>
 
     <div class="header__right">
       <a href="/care/" class="hide-sm">Help</a>
@@ -226,12 +227,20 @@ const count = (slug: string) => available.filter((p) => categories.find((c) => c
     transform: translateY(0.15em) rotate(180deg);
   }
   .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
     font-family: var(--serif);
     font-size: clamp(1.8rem, 3vw, 2.4rem);
     font-weight: 400;
     letter-spacing: -0.02em;
     line-height: 1;
     font-variation-settings: 'opsz' 144;
+  }
+  .wordmark :global(.wordmark__mark) {
+    height: 0.8em;
+    width: auto;
+    transform: translateY(-0.04em);
   }
   .bag {
     display: inline-flex;

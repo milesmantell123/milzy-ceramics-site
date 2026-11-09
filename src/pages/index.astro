@@ -1,4 +1,5 @@
 ---
+import Mark from '../components/Mark.astro';
 import Base from '../layouts/Base.astro';
 import ProductRail from '../components/ProductRail.astro';
 import { available, products, categories, surfaces, ETSY_SHOP, cover, formatPrice } from '../data/products';
@@ -158,6 +159,7 @@ const schema = {
   <section class="story">
     <img src="/images/studio/stamp.jpg" alt="The MM maker's mark, carved by hand into the foot of a soda fired pot" loading="lazy" width="1600" height="1280" />
     <div class="story__card">
+      <Mark class="story__mm" />
       <p class="eyebrow">Our story</p>
       <h2 class="title">Signed by hand, on every foot</h2>
       <p>
@@ -442,6 +444,13 @@ const schema = {
     align-self: center;
     max-width: 34rem;
     padding: clamp(2.5rem, 6vw, 5rem) var(--gutter);
+  }
+  .story__card :global(.story__mm) {
+    display: block;
+    width: 3.25rem;
+    height: auto;
+    color: var(--rust);
+    margin-bottom: 1.5rem;
   }
   .story__card .eyebrow {
     margin-bottom: 1rem;

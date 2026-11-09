@@ -9,7 +9,7 @@ interface Props {
 }
 const { piece, eager = false } = Astro.props;
 const surface = surfaceById[piece.surface];
-const second = piece.cards[1];
+const second = cover(piece, 1);
 ---
 
 <a

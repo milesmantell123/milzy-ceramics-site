@@ -124,6 +124,6 @@ export const ETSY_SHOP = 'https://www.etsy.com/shop/MilzyCeramics';
 export const formatPrice = (n: number) => `$${n.toLocaleString('en-US')}`;
 
 // The cover photo used on cards, with the Etsy copy as a fallback.
-export const cover = (p: Product, i = 0) => p.cards[i] ?? p.images[i];
+export const cover = (p: Product, i = 0) => p.cards[i] ?? p.images[i]?.replace('il_1080xN', 'il_570xN');
 
 export const fullName = (p: Product) => `${p.name} in ${surfaceById[p.surface].name}`;

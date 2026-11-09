@@ -1,5 +1,6 @@
 ---
 import { ETSY_SHOP, categories, surfaces } from '../data/products';
+import Mark from './Mark.astro';
 
 // Paste the signup form address from Buttondown, Kit or Mailchimp here and
 // the newsletter form appears in the footer.
@@ -11,7 +12,7 @@ const year = new Date().getFullYear();
   <div class="wrap">
     <div class="footer__top">
       <div class="footer__signup">
-        <p class="footer__mark">Milzy</p>
+        <p class="footer__mark"><Mark class="footer__mm" />Milzy</p>
         <h2 class="footer__head">Hear about the next kiln opening</h2>
         {NEWSLETTER_ACTION ? (
           <form class="signup" action={NEWSLETTER_ACTION} method="post" target="_blank">
@@ -66,6 +67,15 @@ const year = new Date().getFullYear();
 </footer>
 
 <style>
+  .footer__mark {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .footer__mark :global(.footer__mm) {
+    height: 0.8em;
+    width: auto;
+  }
   .footer {
     background: #1d1a18;
     color: #e9e1d5;
