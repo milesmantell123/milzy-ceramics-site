@@ -26,6 +26,13 @@ const macros = [
   { src: '/images/macro/soda.jpg', caption: 'Soda melted into the clay', alt: 'Close up of a faceted wall with speckled, orange peel soda texture' },
 ];
 
+// Spinning clips. Links go to the kind for now; point each at its own listing once matched.
+const spins = [
+  { src: '/video/spin-1945.mp4', poster: '/video/spin-1945.jpg', label: 'Carved cup', href: '/collection/?category=cups-and-tea', alt: 'A carved soda fired cup turning on a banding wheel' },
+  { src: '/video/spin-1948.mp4', poster: '/video/spin-1948.jpg', label: 'Faceted mug', href: '/collection/?category=mugs', alt: 'A faceted soda fired mug turning on a banding wheel' },
+  { src: '/video/spin-1946.mp4', poster: '/video/spin-1946.jpg', label: 'Faceted cup', href: '/collection/?category=cups-and-tea', alt: 'A faceted soda fired cup turning on a banding wheel' },
+];
+
 const learnImages: Record<string, string> = {
   'soda-firing': '/images/studio/learn-soda.jpg',
   faceting: '/images/studio/learn-facet.jpg',
@@ -198,6 +205,23 @@ const schema = {
     <ProductRail title="The mug shelf" pieces={mugs} href="/collection/?category=mugs" linkLabel="Shop all mugs">
       <p class="rail-sub">Carved, faceted and footed. Made to be held every morning.</p>
     </ProductRail>
+  </section>
+
+  <section class="turntable" aria-labelledby="turntable-title">
+    <div class="wrap">
+      <div class="turntable__head">
+        <p class="eyebrow">On the turntable</p>
+        <h2 class="title" id="turntable-title">See every side</h2>
+      </div>
+      <div class="turntable__row">
+        {spins.map((s) => (
+          <a href={s.href} class="turntable__item">
+            <video src={s.src} poster={s.poster} autoplay muted loop playsinline preload="metadata" aria-label={s.alt} data-autoplay></video>
+            <span>{s.label} &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </div>
   </section>
 
   <section class="section journal">
@@ -507,6 +531,40 @@ const schema = {
     color: rgba(244, 238, 228, 0.7);
   }
 
+  .turntable {
+    background: var(--ink);
+    color: var(--cream);
+    padding: clamp(4rem, 8vw, 7rem) 0;
+  }
+  .turntable__head {
+    margin-bottom: 2.5rem;
+  }
+  .turntable__head .eyebrow {
+    color: var(--sand);
+    margin-bottom: 0.75rem;
+  }
+  .turntable__row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1rem, 2vw, 2rem);
+  }
+  .turntable__item video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius);
+    background: #000;
+  }
+  .turntable__item span {
+    display: block;
+    margin-top: 0.9rem;
+    font-weight: 500;
+  }
+  .turntable__item:hover span {
+    color: var(--sand);
+  }
+
   .story {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
@@ -609,6 +667,16 @@ const schema = {
     }
   }
   @media (max-width: 760px) {
+    .turntable__row {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: 72%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+    }
+    .turntable__item {
+      scroll-snap-align: start;
+    }
     .reel__inner {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
