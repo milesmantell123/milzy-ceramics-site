@@ -18,6 +18,13 @@ const surfaceCards = surfaces.map((s) => ({
 const mugs = available.filter((p) => p.category === 'Mugs').slice(0, 10);
 const from = Math.min(...available.map((p) => p.price));
 
+const macros = [
+  { src: '/images/macro/carved.jpg', caption: 'Carved lines, lit by the flame', alt: 'Close up of carved lines in bone white clay with rust orange flashing' },
+  { src: '/images/macro/drip.jpg', caption: 'Glaze running over an edge', alt: 'Close up of a pale green glaze breaking over a ridge and running down in streaks' },
+  { src: '/images/macro/black.jpg', caption: 'Rust and black, cut by hand', alt: 'Close up of carved rust red clay beside a glossy black glaze' },
+  { src: '/images/macro/soda.jpg', caption: 'Soda melted into the clay', alt: 'Close up of a faceted wall with speckled, orange peel soda texture' },
+];
+
 const learnImages: Record<string, string> = {
   'soda-firing': '/images/studio/learn-soda.jpg',
   faceting: '/images/studio/learn-facet.jpg',
@@ -40,7 +47,7 @@ const schema = {
       <source media="(max-width: 760px)" srcset="/images/studio/hero-tall.jpg" width="900" height="1200" />
       <img
         src="/images/studio/hero-wide.jpg"
-        alt="A soda fired bottle vase with a long amber neck and a speckled teal body"
+        alt="A carved soda fired vase with a blue rim, bone white clay and rust orange flashing"
         width="2600"
         height="1400"
         fetchpriority="high"
@@ -93,6 +100,21 @@ const schema = {
           </a>
         ))}
       </div>
+    </div>
+  </section>
+
+  <section class="closeup" aria-labelledby="closeup-title">
+    <div class="wrap closeup__head">
+      <p class="eyebrow">Up close</p>
+      <h2 class="title" id="closeup-title">Every surface is a record of the fire</h2>
+    </div>
+    <div class="closeup__grid">
+      {macros.map((m) => (
+        <figure class="closeup__tile">
+          <img src={m.src} alt={m.alt} loading="lazy" width="800" height="800" />
+          <figcaption>{m.caption}</figcaption>
+        </figure>
+      ))}
     </div>
   </section>
 
@@ -367,6 +389,43 @@ const schema = {
     color: var(--stone);
   }
 
+  .closeup {
+    padding-top: clamp(4rem, 8vw, 7rem);
+  }
+  .closeup__head {
+    margin-bottom: 2rem;
+  }
+  .closeup__head .eyebrow {
+    margin-bottom: 0.75rem;
+  }
+  .closeup__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .closeup__tile {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+  }
+  .closeup__tile img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    transition: transform 1.2s ease;
+  }
+  .closeup__tile:hover img {
+    transform: scale(1.06);
+  }
+  .closeup__tile figcaption {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 2.5rem 1.25rem 1rem;
+    color: var(--cream);
+    font-size: 0.85rem;
+    background: linear-gradient(to top, rgba(36, 31, 27, 0.6), transparent);
+  }
+
   .story {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
@@ -462,6 +521,9 @@ const schema = {
     }
   }
   @media (max-width: 760px) {
+    .closeup__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .hero {
       color: var(--ink);
     }
