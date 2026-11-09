@@ -43,3 +43,7 @@ Paste a signup form address (Buttondown, Kit or Mailchimp) into `NEWSLETTER_ACTI
 ## Hosting
 
 The `dist/` folder can be hosted on Netlify, Cloudflare Pages or Vercel for free. Connect this repository, use `npm run build` as the build command and `dist` as the output folder. Then update `site` in `astro.config.mjs` and the sitemap line in `public/robots.txt` to the real domain.
+
+## Previews and hosting
+
+The site is connected to Netlify (settings in `netlify.toml`). Every pull request gets a Deploy Preview link, posted as a comment on the pull request, that works on any phone. Merging to `main` updates the main Netlify site.
