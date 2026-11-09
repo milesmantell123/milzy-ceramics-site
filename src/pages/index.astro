@@ -172,6 +172,28 @@ const schema = {
     </div>
   </section>
 
+  <section class="reel" aria-labelledby="reel-title">
+    <div class="wrap reel__inner">
+      <div class="reel__text">
+        <p class="eyebrow">From the studio</p>
+        <h2 class="title" id="reel-title">From the wheel to the fire</h2>
+        <p>
+          Every piece starts as a lump of clay on the wheel. Watch a vase take shape, then see a
+          few pieces from the latest soda firing.
+        </p>
+        <a href="/studio/" class="button">About the studio</a>
+      </div>
+      <figure class="reel__clip">
+        <video src="/video/throwing.mp4" poster="/video/throwing.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Miles throwing a vase on the potter's wheel" data-autoplay></video>
+        <figcaption>Thrown on the wheel</figcaption>
+      </figure>
+      <figure class="reel__clip">
+        <video src="/video/soda-fire-drop.mp4" poster="/video/soda-fire-drop.jpg" controls playsinline preload="none" aria-label="A short film of mugs and cups from a soda firing"></video>
+        <figcaption>Fresh from the soda kiln, with sound</figcaption>
+      </figure>
+    </div>
+  </section>
+
   <section class="section">
     <ProductRail title="The mug shelf" pieces={mugs} href="/collection/?category=mugs" linkLabel="Shop all mugs">
       <p class="rail-sub">Carved, faceted and footed. Made to be held every morning.</p>
@@ -212,6 +234,17 @@ const schema = {
     </div>
   </section>
 </Base>
+
+<script>
+  // Respect reduced motion: stop looping clips for people who ask for less movement.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]').forEach((v) => {
+      v.removeAttribute('autoplay');
+      v.pause();
+      v.controls = true;
+    });
+  }
+</script>
 
 <style>
   .hero {
@@ -428,6 +461,52 @@ const schema = {
     background: linear-gradient(to top, rgba(36, 31, 27, 0.6), transparent);
   }
 
+  .reel {
+    background: var(--ink);
+    color: var(--cream);
+    padding: clamp(4rem, 8vw, 7rem) 0;
+  }
+  .reel__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: center;
+  }
+  .reel__text .eyebrow {
+    color: var(--sand);
+    margin-bottom: 0.75rem;
+  }
+  .reel__text p:not(.eyebrow) {
+    color: rgba(244, 238, 228, 0.75);
+    margin: 1.25rem 0 2rem;
+    max-width: 26rem;
+  }
+  .reel__text .button {
+    background: transparent;
+    border: 1px solid var(--cream);
+    color: var(--cream);
+  }
+  .reel__text .button:hover {
+    background: var(--cream);
+    color: var(--ink);
+  }
+  .reel__clip {
+    margin: 0;
+  }
+  .reel__clip video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    object-fit: cover;
+    border-radius: var(--radius);
+    background: #000;
+  }
+  .reel__clip figcaption {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: rgba(244, 238, 228, 0.7);
+  }
+
   .story {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
@@ -530,6 +609,12 @@ const schema = {
     }
   }
   @media (max-width: 760px) {
+    .reel__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .reel__text {
+      grid-column: 1 / -1;
+    }
     .closeup__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
