@@ -36,12 +36,17 @@ const schema = {
 
 <Base schema={schema}>
   <section class="hero">
-    <div class="hero__images" aria-hidden="true">
-      <img src="/images/studio/hero-tea-bowl.jpg" alt="" width="1000" height="1250" fetchpriority="high" />
-      <img src="/images/studio/hero-mug.jpg" alt="" width="1000" height="1250" />
-      <img src="/images/studio/hero-bowl.jpg" alt="" width="1000" height="1250" />
-    </div>
-    <div class="hero__text">
+    <picture class="hero__media">
+      <source media="(max-width: 760px)" srcset="/images/studio/hero-tall.jpg" width="900" height="1200" />
+      <img
+        src="/images/studio/hero-wide.jpg"
+        alt="A soda fired bottle vase with a long amber neck and a speckled teal body"
+        width="2600"
+        height="1400"
+        fetchpriority="high"
+      />
+    </picture>
+    <div class="wrap hero__text">
       <p class="eyebrow">Soda fired stoneware &middot; Southern California</p>
       <h1 class="display">Half me,<br /><em>half fire.</em></h1>
       <p class="hero__copy">
@@ -129,14 +134,15 @@ const schema = {
   </section>
 
   <section class="story">
-    <img src="/images/studio/stamp.jpg" alt="The MM maker's mark stamped into the foot of a soda fired pot" loading="lazy" width="2400" height="1091" />
+    <img src="/images/studio/stamp.jpg" alt="The MM maker's mark, carved by hand into the foot of a soda fired pot" loading="lazy" width="1600" height="1280" />
     <div class="story__card">
       <p class="eyebrow">Our story</p>
-      <h2 class="title">Stamped MM on the foot</h2>
+      <h2 class="title">Signed by hand, on every foot</h2>
       <p>
         Milzy is a one-person studio in Southern California. Each pot is thrown on the wheel,
         carved or cut into facets while the clay is soft, and fired for three days in a soda kiln.
-        I think of the work as half me, half accident: I make the form; the kiln decides the rest.
+        Before it goes in, I carve my MM into the foot by hand. I think of the work as half me,
+        half accident: I make the form; the kiln decides the rest.
       </p>
       <a href="/studio/" class="button">Read our story</a>
     </div>
@@ -155,7 +161,7 @@ const schema = {
         <a href="/learn/" class="link">All articles</a>
       </div>
       <div class="journal__grid">
-        {articles.map((a) => (
+        {articles.slice(0, 3).map((a) => (
           <a href={`/learn/${a.slug}/`} class="post reveal">
             <img src={learnImages[a.slug]} alt="" loading="lazy" width="900" height="1125" />
             <p class="eyebrow">{a.subtitle} &middot; {a.minutes} min read</p>
@@ -186,40 +192,28 @@ const schema = {
 <style>
   .hero {
     position: relative;
-    background: #1d1a18;
+    background: var(--cream);
     color: var(--paper);
-    overflow: hidden;
   }
-  .hero__images {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    height: min(82vh, 52rem);
-    min-height: 30rem;
-  }
-  .hero__images img {
+  .hero__media img {
     width: 100%;
-    height: 100%;
+    height: clamp(32rem, 54vw, 52rem);
     object-fit: cover;
-  }
-  .hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(90deg, rgba(20, 17, 15, 0.7) 0%, rgba(20, 17, 15, 0.25) 45%, rgba(20, 17, 15, 0) 70%),
-      linear-gradient(180deg, rgba(20, 17, 15, 0) 40%, rgba(20, 17, 15, 0.6) 100%);
-    pointer-events: none;
+    object-position: 78% 50%;
   }
   .hero__text {
     position: absolute;
-    z-index: 1;
-    left: var(--gutter);
-    right: var(--gutter);
-    bottom: clamp(2rem, 6vw, 4.5rem);
-    max-width: 40rem;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 6%;
+  }
+  .hero__text > * {
+    max-width: 38rem;
   }
   .hero .eyebrow {
-    color: #e3d8c8;
+    color: #ddd6cc;
     margin-bottom: 1.25rem;
   }
   .hero h1 em {
@@ -230,7 +224,7 @@ const schema = {
     max-width: 30rem;
     margin: 1.5rem 0 2rem;
     font-size: 1.1rem;
-    color: #efe7dc;
+    color: #efe9e1;
   }
   .hero__ctas {
     display: flex;
@@ -374,23 +368,21 @@ const schema = {
   }
 
   .story {
-    position: relative;
-    background: #b5603a;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    background: var(--sand);
   }
   .story img {
     width: 100%;
-    height: clamp(26rem, 60vw, 44rem);
+    height: 100%;
+    min-height: 26rem;
+    max-height: 44rem;
     object-fit: cover;
   }
   .story__card {
-    position: absolute;
-    right: var(--gutter);
-    top: 50%;
-    transform: translateY(-50%);
-    max-width: 30rem;
-    padding: clamp(1.75rem, 3.5vw, 3rem);
-    background: var(--paper);
-    border-radius: var(--radius);
+    align-self: center;
+    max-width: 34rem;
+    padding: clamp(2.5rem, 6vw, 5rem) var(--gutter);
   }
   .story__card .eyebrow {
     margin-bottom: 1rem;
@@ -470,12 +462,29 @@ const schema = {
     }
   }
   @media (max-width: 760px) {
-    .hero__images {
-      grid-template-columns: 1fr;
-      height: 78vh;
+    .hero {
+      color: var(--ink);
     }
-    .hero__images img:not(:first-child) {
-      display: none;
+    .hero__media img {
+      height: auto;
+      aspect-ratio: 3 / 4;
+    }
+    .hero__text {
+      position: static;
+      margin-top: -3rem;
+      padding-bottom: 1rem;
+    }
+    .hero .eyebrow,
+    .hero__copy {
+      color: var(--stone);
+    }
+    .hero h1 em {
+      color: var(--rust);
+    }
+    .hero .button--light {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--cream);
     }
     .new__intro,
     .palette__head {
@@ -488,14 +497,13 @@ const schema = {
       grid-column: 1 / -1;
       aspect-ratio: 4 / 3;
     }
-    .story__card {
-      position: static;
-      transform: none;
-      max-width: none;
-      border-radius: 0;
+    .story {
+      grid-template-columns: 1fr;
     }
     .story img {
-      height: 18rem;
+      min-height: 0;
+      height: auto;
+      aspect-ratio: 5 / 4;
     }
     .journal__grid,
     .words__grid {
