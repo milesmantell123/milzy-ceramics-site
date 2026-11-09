@@ -1,10 +1,28 @@
 ---
 import Base from '../layouts/Base.astro';
-import PieceCard from '../components/PieceCard.astro';
-import { products, ETSY_SHOP } from '../data/products';
+import ProductRail from '../components/ProductRail.astro';
+import { available, products, categories, surfaces, ETSY_SHOP, cover, formatPrice } from '../data/products';
+import { articles } from '../data/articles';
 import { reviews } from '../data/reviews';
 
-const featured = products.filter((p) => p.featured).slice(0, 4);
+const newest = available.slice(0, 12);
+
+// One photo for each kind of piece and each surface.
+const pick = (fn: (p: (typeof products)[number]) => boolean) => available.find(fn) ?? products.find(fn);
+const kindTiles = categories.map((c) => ({ ...c, piece: pick((p) => p.category === c.name) }));
+const surfaceCards = surfaces.map((s) => ({
+  ...s,
+  piece: pick((p) => p.surface === s.id),
+  count: available.filter((p) => p.surface === s.id).length,
+}));
+const mugs = available.filter((p) => p.category === 'Mugs').slice(0, 10);
+const from = Math.min(...available.map((p) => p.price));
+
+const learnImages: Record<string, string> = {
+  'soda-firing': '/images/studio/learn-soda.jpg',
+  faceting: '/images/studio/learn-facet.jpg',
+  stoneware: '/images/studio/learn-stoneware.jpg',
+};
 
 const schema = {
   '@context': 'https://schema.org',
@@ -16,92 +34,151 @@ const schema = {
 };
 ---
 
-<Base dark schema={schema}>
+<Base schema={schema}>
   <section class="hero">
-    <div class="hero__glow" aria-hidden="true"></div>
-    <div class="wrap hero__inner">
-      <p class="eyebrow hero__eyebrow">Soda fired stoneware &middot; Southern California</p>
-      <h1 class="display hero__title">Half me.<br /><em>Half fire.</em></h1>
-      <div class="hero__foot">
-        <p class="hero__copy">
-          Each piece is thrown by hand, then handed to a kiln at cone 10, where vaporised soda
-          finishes what the hands began. No two leave the fire the same.
-        </p>
-        <a href="/collection/" class="button button--light">Discover the collection</a>
-      </div>
+    <div class="hero__images" aria-hidden="true">
+      <img src="/images/studio/hero-tea-bowl.jpg" alt="" width="1000" height="1250" fetchpriority="high" />
+      <img src="/images/studio/hero-mug.jpg" alt="" width="1000" height="1250" />
+      <img src="/images/studio/hero-bowl.jpg" alt="" width="1000" height="1250" />
     </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap intro reveal">
-      <p class="eyebrow">The house</p>
-      <p class="intro__statement">
-        &ldquo;I make pots and then hand them to the fire.&rdquo; Every vessel is wheel-thrown,
-        often faceted by hand, and soda fired to around 2,350&deg;F. The flame decides the rest:
-        where the rust blooms, where the glaze runs, where the clay is left bare.
+    <div class="hero__text">
+      <p class="eyebrow">Soda fired stoneware &middot; Southern California</p>
+      <h1 class="display">Half me,<br /><em>half fire.</em></h1>
+      <p class="hero__copy">
+        Wheel-thrown pots, carved and faceted by hand, then handed to a soda kiln at cone 10.
+        Every piece is one of one.
       </p>
+      <div class="hero__ctas">
+        <a href="/collection/" class="button button--light">Shop all pieces</a>
+        <a href="/learn/soda-firing/" class="hero__link">How the fire works &rarr;</a>
+      </div>
     </div>
   </section>
 
-  <section class="section featured">
-    <div class="wrap">
-      <div class="head reveal">
-        <h2 class="title">Selected works</h2>
-        <a href="/collection/" class="link">View all fifteen</a>
+  <section class="section new">
+    <div class="wrap new__intro">
+      <div>
+        <p class="eyebrow">New arrivals</p>
+        <h2 class="display new__title">Fresh from the kiln</h2>
       </div>
-      <div class="featured__grid">
-        {featured.map((p) => (
-          <div class="reveal"><PieceCard piece={p} /></div>
+      <div class="new__side">
+        <p>
+          {available.length} pieces from the latest firings, from {formatPrice(from)}. When one
+          finds a home it is gone for good, and the next kiln brings something new.
+        </p>
+        <div class="new__links">
+          <a href="/collection/?sort=new" class="button button--solid">Shop new</a>
+          {categories.slice(0, 4).map((c) => <a href={`/collection/?category=${c.slug}`} class="link">{c.name}</a>)}
+        </div>
+      </div>
+    </div>
+    <div class="new__rail">
+      <ProductRail title="Just added" pieces={newest} href="/collection/?sort=new" />
+    </div>
+  </section>
+
+  <section class="kinds">
+    <div class="wrap">
+      <h2 class="title kinds__title">Shop by kind</h2>
+      <div class="kinds__grid">
+        {kindTiles.map((k) => (
+          <a href={`/collection/?category=${k.slug}`} class="kind reveal">
+            {k.piece && <img src={cover(k.piece)} alt="" loading="lazy" width="570" height="713" />}
+            <span class="kind__label">{k.name}</span>
+          </a>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="fire">
-    <div class="wrap fire__inner">
-      <div class="fire__text reveal">
-        <p class="eyebrow">Learn</p>
-        <h2 class="title">What the fire does</h2>
-        <p class="lede">
-          Soda firing is one of the least predictable ways to finish a pot, and one of the most
-          beautiful. Soda ash is introduced into the hot kiln, turns to vapour, and settles on every
-          surface the flame touches.
-        </p>
-        <a href="/learn/soda-firing/" class="button button--light">Read the essay</a>
+  <section class="section palette">
+    <div class="wrap palette__head">
+      <div>
+        <p class="eyebrow">The palette</p>
+        <h2 class="display">Seven surfaces</h2>
       </div>
-      <ol class="fire__steps reveal">
-        <li><span>I</span><p>Thrown on the wheel, then faceted while the clay is still soft.</p></li>
-        <li><span>II</span><p>Dried slowly, bisque fired, glazed in part and left bare in part.</p></li>
-        <li><span>III</span><p>Soda fired to cone 10. The flame carries sodium across the work.</p></li>
-        <li><span>IV</span><p>The kiln is opened. Every piece is now one of one.</p></li>
-      </ol>
+      <p class="palette__copy">
+        Every pot starts as the same white stoneware. In the soda kiln, flame and vapour turn bare
+        clay to rust and copper, and one or two glazes settle into the carving. We name the
+        results, so you can find the colours you love and collect across them.
+      </p>
+    </div>
+    <div class="wrap" data-rail>
+      <div class="rail-head palette__controls">
+        <a href="/surfaces/" class="link">Meet the surfaces</a>
+        <div class="rail-arrows">
+          <button data-dir="-1" aria-label="Scroll back">&larr;</button>
+          <button data-dir="1" aria-label="Scroll forward">&rarr;</button>
+        </div>
+      </div>
+      <div class="rail palette__rail">
+        {surfaceCards.map((s) => (
+          <a href={`/collection/?surface=${s.id}`} class="surface">
+            <div class="surface__media">
+              {s.piece && <img src={cover(s.piece, 1)} alt={`A piece in ${s.name}`} loading="lazy" width="570" height="713" />}
+            </div>
+            <p class="surface__tag">{s.tagline}</p>
+            <p class="surface__name">
+              <span class="swatch" style={`background:${s.swatch}`}></span>{s.name}
+              <span class="surface__count">{s.count} pieces</span>
+            </p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="story">
+    <img src="/images/studio/stamp.jpg" alt="The MM maker's mark stamped into the foot of a soda fired pot" loading="lazy" width="2400" height="1091" />
+    <div class="story__card">
+      <p class="eyebrow">Our story</p>
+      <h2 class="title">Stamped MM on the foot</h2>
+      <p>
+        Milzy is a one-person studio in Southern California. Each pot is thrown on the wheel,
+        carved or cut into facets while the clay is soft, and fired for three days in a soda kiln.
+        I think of the work as half me, half accident: I make the form; the kiln decides the rest.
+      </p>
+      <a href="/studio/" class="button">Read our story</a>
     </div>
   </section>
 
   <section class="section">
+    <ProductRail title="The mug shelf" pieces={mugs} href="/collection/?category=mugs" linkLabel="Shop all mugs">
+      <p class="rail-sub">Carved, faceted and footed. Made to be held every morning.</p>
+    </ProductRail>
+  </section>
+
+  <section class="section journal">
     <div class="wrap">
-      <p class="eyebrow center reveal">In their words</p>
-      <div class="reviews">
+      <div class="rail-head">
+        <h2 class="title">Learn about the work</h2>
+        <a href="/learn/" class="link">All articles</a>
+      </div>
+      <div class="journal__grid">
+        {articles.map((a) => (
+          <a href={`/learn/${a.slug}/`} class="post reveal">
+            <img src={learnImages[a.slug]} alt="" loading="lazy" width="900" height="1125" />
+            <p class="eyebrow">{a.subtitle} &middot; {a.minutes} min read</p>
+            <h3>{a.title}</h3>
+            <p>{a.summary}</p>
+            <span class="link">Read more</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section words">
+    <div class="wrap">
+      <p class="eyebrow">Five stars on Etsy</p>
+      <div class="words__grid">
         {reviews.map((r) => (
-          <figure class="review reveal">
+          <figure class="reveal">
             <blockquote>&ldquo;{r.quote}&rdquo;</blockquote>
-            <figcaption class="eyebrow">{r.name}</figcaption>
+            <figcaption>{r.name}</figcaption>
           </figure>
         ))}
       </div>
-      <p class="center reviews__note eyebrow reveal">Five stars across every review on Etsy</p>
-    </div>
-  </section>
-
-  <hr class="rule" />
-
-  <section class="section">
-    <div class="wrap closing reveal">
-      <h2 class="title">Commissions and private requests</h2>
-      <p class="lede">
-        Sets, larger vessels and pieces made for a particular room or table.
-      </p>
-      <a href="/contact/" class="button">Begin a conversation</a>
     </div>
   </section>
 </Base>
@@ -109,185 +186,320 @@ const schema = {
 <style>
   .hero {
     position: relative;
-    min-height: 100svh;
-    background: var(--ink);
-    color: var(--ivory);
+    background: #1d1a18;
+    color: var(--paper);
     overflow: hidden;
-    display: flex;
   }
-  .hero__glow {
+  .hero__images {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    height: min(82vh, 52rem);
+    min-height: 30rem;
+  }
+  .hero__images img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero::after {
+    content: '';
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 45% 55% at 78% 60%, rgba(180, 83, 42, 0.55) 0%, transparent 70%),
-      radial-gradient(ellipse 30% 35% at 82% 66%, rgba(214, 120, 60, 0.35) 0%, transparent 70%);
-    animation: breathe 9s ease-in-out infinite alternate;
+      linear-gradient(90deg, rgba(20, 17, 15, 0.7) 0%, rgba(20, 17, 15, 0.25) 45%, rgba(20, 17, 15, 0) 70%),
+      linear-gradient(180deg, rgba(20, 17, 15, 0) 40%, rgba(20, 17, 15, 0.6) 100%);
+    pointer-events: none;
   }
-  @keyframes breathe {
-    from { opacity: 0.75; transform: scale(1); }
-    to { opacity: 1; transform: scale(1.06); }
+  .hero__text {
+    position: absolute;
+    z-index: 1;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: clamp(2rem, 6vw, 4.5rem);
+    max-width: 40rem;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .hero__glow { animation: none; }
+  .hero .eyebrow {
+    color: #e3d8c8;
+    margin-bottom: 1.25rem;
   }
-  .hero__inner {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding-top: 9rem;
-    padding-bottom: clamp(3rem, 8vw, 6rem);
-  }
-  .hero__eyebrow {
-    color: #a59d92;
-    margin-bottom: 2rem;
-  }
-  .hero__title em {
+  .hero h1 em {
     font-style: italic;
-    color: #e7a273;
-  }
-  .hero__foot {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 3rem;
-    margin-top: 3.5rem;
-    flex-wrap: wrap;
+    color: #f0b48c;
   }
   .hero__copy {
     max-width: 30rem;
-    margin: 0;
-    color: #d9d2c6;
+    margin: 1.5rem 0 2rem;
+    font-size: 1.1rem;
+    color: #efe7dc;
   }
-
-  .intro {
-    max-width: 62rem;
-    text-align: center;
-  }
-  .intro .eyebrow {
-    margin-bottom: 2.5rem;
-  }
-  .intro__statement {
-    font-family: var(--serif);
-    font-size: clamp(1.6rem, 3.2vw, 2.6rem);
-    line-height: 1.35;
-    margin: 0;
-  }
-
-  .featured {
-    padding-top: 0;
-  }
-  .head {
+  .hero__ctas {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 2rem;
-    margin-bottom: 4rem;
+    align-items: center;
+    gap: 1.75rem;
     flex-wrap: wrap;
   }
-  .featured__grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: clamp(1.25rem, 2.5vw, 2.5rem);
-  }
-  .featured__grid > :nth-child(even) {
-    margin-top: 5rem;
+  .hero__link {
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
   }
 
-  .fire {
-    background: var(--ink);
-    color: var(--ivory);
-    padding: clamp(5rem, 12vw, 10rem) 0;
-  }
-  .fire .eyebrow {
-    color: #a59d92;
-    margin-bottom: 2rem;
-  }
-  .fire__inner {
+  .new__intro {
     display: grid;
     grid-template-columns: 1.1fr 1fr;
-    gap: clamp(3rem, 8vw, 8rem);
-    align-items: center;
+    gap: 2rem 4rem;
+    align-items: end;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
   }
-  .fire .title {
+  .new__intro .eyebrow,
+  .palette__head .eyebrow {
+    margin-bottom: 1rem;
+  }
+  .new__side p {
+    font-size: 1.1rem;
+    max-width: 34rem;
+  }
+  .new__links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .new__rail :global(.title) {
+    font-size: 1.4rem;
+  }
+
+  .kinds {
+    padding-bottom: clamp(3.5rem, 8vw, 7rem);
+  }
+  .kinds__title {
+    margin-bottom: 1.75rem;
+  }
+  .kinds__grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+  .kind {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--sand);
+  }
+  .kind img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .kind:hover img {
+    transform: scale(1.04);
+  }
+  .kind__label {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    background: var(--paper);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .palette {
+    background: var(--sand);
+  }
+  .palette__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem 4rem;
+    align-items: end;
     margin-bottom: 2rem;
   }
-  .fire .lede {
-    color: #d9d2c6;
-    margin-bottom: 2.5rem;
-  }
-  .fire__steps {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .fire__steps li {
-    display: grid;
-    grid-template-columns: 4rem 1fr;
-    padding: 1.75rem 0;
-    border-top: 1px solid #2f2b27;
-  }
-  .fire__steps li:last-child {
-    border-bottom: 1px solid #2f2b27;
-  }
-  .fire__steps span {
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: 1.4rem;
-    color: #e7a273;
-  }
-  .fire__steps p {
-    margin: 0;
-    color: #d9d2c6;
-  }
-
-  .center {
-    text-align: center;
-  }
-  .reviews {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(2rem, 5vw, 5rem);
-    margin: 4rem 0;
-  }
-  .review {
-    margin: 0;
-    text-align: center;
-  }
-  .review blockquote {
-    font-family: var(--serif);
-    font-size: clamp(1.4rem, 2.2vw, 1.85rem);
-    line-height: 1.4;
-    margin: 0 0 1.5rem;
-  }
-  .reviews__note {
+  .palette__copy {
+    font-size: 1.1rem;
+    max-width: 36rem;
     margin: 0;
   }
-
-  .closing {
-    text-align: center;
-    max-width: 44rem;
+  .palette__controls {
+    justify-content: space-between;
+    align-items: center;
   }
-  .closing .title {
-    margin-bottom: 1.5rem;
+  .surface {
+    display: block;
   }
-  .closing .lede {
+  .surface__media {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--cream);
+  }
+  .surface__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .surface:hover .surface__media img {
+    transform: scale(1.04);
+  }
+  .surface__tag {
+    margin: 0.9rem 0 0.2rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--stone);
-    margin-bottom: 2.5rem;
+  }
+  .surface__name {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 1.6rem;
+  }
+  .surface__name .swatch {
+    width: 1rem;
+    height: 1rem;
+  }
+  .surface__count {
+    margin-left: auto;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--stone);
   }
 
-  @media (max-width: 960px) {
-    .featured__grid {
-      grid-template-columns: repeat(2, 1fr);
+  .story {
+    position: relative;
+    background: #b5603a;
+  }
+  .story img {
+    width: 100%;
+    height: clamp(26rem, 60vw, 44rem);
+    object-fit: cover;
+  }
+  .story__card {
+    position: absolute;
+    right: var(--gutter);
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 30rem;
+    padding: clamp(1.75rem, 3.5vw, 3rem);
+    background: var(--paper);
+    border-radius: var(--radius);
+  }
+  .story__card .eyebrow {
+    margin-bottom: 1rem;
+  }
+  .story__card .title {
+    margin-bottom: 1.25rem;
+  }
+  .story__card p:not(.eyebrow) {
+    margin-bottom: 1.75rem;
+  }
+
+  .rail-sub {
+    margin: 0.5rem 0 0;
+    color: var(--stone);
+  }
+
+  .journal {
+    border-top: 1px solid var(--line);
+  }
+  .journal__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1rem, 2vw, 2rem);
+  }
+  .post img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 1.1rem;
+  }
+  .post .eyebrow {
+    margin-bottom: 0.6rem;
+  }
+  .post h3 {
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+  }
+  .post p:not(.eyebrow) {
+    color: var(--stone);
+  }
+
+  .words {
+    background: var(--ink);
+    color: var(--cream);
+    text-align: center;
+  }
+  .words .eyebrow {
+    color: #bcb2a5;
+  }
+  .words__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(2rem, 5vw, 4rem);
+    margin-top: 2.5rem;
+  }
+  .words figure {
+    margin: 0;
+  }
+  .words blockquote {
+    margin: 0 0 1rem;
+    font-family: var(--serif);
+    font-size: clamp(1.3rem, 2vw, 1.65rem);
+    line-height: 1.35;
+  }
+  .words figcaption {
+    color: #bcb2a5;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 1000px) {
+    .kinds__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-    .fire__inner,
-    .reviews {
+    .journal__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 760px) {
+    .hero__images {
+      grid-template-columns: 1fr;
+      height: 78vh;
+    }
+    .hero__images img:not(:first-child) {
+      display: none;
+    }
+    .new__intro,
+    .palette__head {
       grid-template-columns: 1fr;
     }
-  }
-  @media (max-width: 520px) {
-    .featured__grid > :nth-child(even) {
-      margin-top: 2.5rem;
+    .kinds__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .kinds__grid > :first-child {
+      grid-column: 1 / -1;
+      aspect-ratio: 4 / 3;
+    }
+    .story__card {
+      position: static;
+      transform: none;
+      max-width: none;
+      border-radius: 0;
+    }
+    .story img {
+      height: 18rem;
+    }
+    .journal__grid,
+    .words__grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

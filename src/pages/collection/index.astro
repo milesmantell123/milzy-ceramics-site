@@ -1,90 +1,320 @@
 ---
 import Base from '../../layouts/Base.astro';
-import PageHead from '../../components/PageHead.astro';
 import PieceCard from '../../components/PieceCard.astro';
-import { products, categories } from '../../data/products';
+import { products, available, categories, surfaces } from '../../data/products';
 
-const groups = categories
-  .map((c) => ({
-    name: c,
-    id: c.toLowerCase().replace(/\s+/g, '-'),
-    pieces: products.filter((p) => p.category === c),
-  }))
-  .filter((g) => g.pieces.length);
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Shop all soda fired stoneware',
+  hasPart: {
+    '@type': 'ItemList',
+    itemListElement: available.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: new URL(`/collection/${p.slug}/`, Astro.site).href,
+      name: `${p.name} in ${p.surface}`,
+    })),
+  },
+};
 ---
 
 <Base
-  title="The Collection"
-  description="Fifteen soda fired stoneware pieces: vases, faceted mugs and cups, bowls, lidded jars and objects. Each one of one, made by hand in Southern California."
+  title="Shop All"
+  description={`Shop ${available.length} handmade soda fired stoneware pieces: mugs, cups, matcha bowls, serving bowls, vases and lidded jars. Each one of one, made in Southern California.`}
+  schema={schema}
 >
-  <PageHead
-    eyebrow="The collection"
-    title="One of one"
-    lede="Each piece below exists once. When it finds a home, it is gone, and the next kiln brings something new."
-  />
+  <section class="wrap shophead">
+    <p class="eyebrow crumbs"><a href="/">Home</a> / Shop</p>
+    <h1 class="display" data-heading>Shop all</h1>
+    <p class="shophead__lede" data-lede>
+      Every piece below exists once. Filter by kind or by surface, and buy securely through our Etsy
+      shop.
+    </p>
+  </section>
 
-  <nav class="wrap filters" aria-label="Categories">
-    {groups.map((g) => <a href={`#${g.id}`} class="eyebrow">{g.name}</a>)}
-  </nav>
-
-  {
-    groups.map((g) => (
-      <section id={g.id} class="group">
-        <div class="wrap">
-          <div class="group__head reveal">
-            <h2 class="title">{g.name}</h2>
-            <p class="eyebrow">{g.pieces.length} {g.pieces.length === 1 ? 'piece' : 'pieces'}</p>
-          </div>
-          <div class="grid">
-            {g.pieces.map((p) => (
-              <div class="reveal">
-                <PieceCard piece={p} />
-              </div>
-            ))}
-          </div>
+  <div class="filters-wrap">
+    <div class="wrap filters" role="toolbar" aria-label="Filter pieces">
+      <div class="chips" data-group="category">
+        <button class="chip is-on" data-value="">All</button>
+        {categories.map((c) => <button class="chip" data-value={c.slug} data-name={c.name}>{c.name}</button>)}
+      </div>
+      <div class="filters__right">
+        <div class="swatches" data-group="surface" aria-label="Surface">
+          {surfaces.map((s) => (
+            <button class="swatch-btn" data-value={s.id} data-name={s.name} title={s.name} aria-pressed="false">
+              <span class="swatch" style={`background:${s.swatch}`}></span>
+              <span class="swatch-btn__name">{s.name}</span>
+            </button>
+          ))}
         </div>
-      </section>
-    ))
-  }
+        <label class="sort">
+          <span class="visually-hidden">Sort</span>
+          <select data-sort>
+            <option value="new">Newest</option>
+            <option value="low">Price, low to high</option>
+            <option value="high">Price, high to low</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <section class="wrap results">
+    <div class="results__bar">
+      <p data-count>{available.length} pieces</p>
+      <label class="toggle"><input type="checkbox" data-sold /> Show sold pieces</label>
+    </div>
+    <div class="grid" data-grid>
+      {products.map((p, i) => <PieceCard piece={p} eager={i < 4} />)}
+    </div>
+    <p class="empty" data-empty hidden>
+      Nothing here right now. <button class="link" data-reset>Clear filters</button>
+    </p>
+  </section>
 </Base>
 
+<script>
+  const grid = document.querySelector<HTMLElement>('[data-grid]')!;
+  const cards = Array.from(grid.querySelectorAll<HTMLElement>('.card'));
+  const countEl = document.querySelector('[data-count]')!;
+  const emptyEl = document.querySelector<HTMLElement>('[data-empty]')!;
+  const soldBox = document.querySelector<HTMLInputElement>('[data-sold]')!;
+  const sortSel = document.querySelector<HTMLSelectElement>('[data-sort]')!;
+  const heading = document.querySelector('[data-heading]')!;
+  const catBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-group="category"] .chip'));
+  const surfBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-group="surface"] .swatch-btn'));
+
+  const catName: Record<string, string> = {};
+  catBtns.forEach((b) => b.dataset.value && (catName[b.dataset.value] = b.dataset.name!));
+  const surfName: Record<string, string> = {};
+  surfBtns.forEach((b) => (surfName[b.dataset.value!] = b.dataset.name!));
+
+  const params = new URLSearchParams(location.search);
+  const state = {
+    category: params.get('category') ?? '',
+    surface: params.get('surface') ?? '',
+    sort: params.get('sort') ?? 'new',
+    sold: params.get('sold') === '1',
+  };
+
+  function render() {
+    catBtns.forEach((b) => b.classList.toggle('is-on', (b.dataset.value ?? '') === state.category));
+    surfBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.value === state.surface)));
+    sortSel.value = state.sort;
+    soldBox.checked = state.sold;
+
+    const sorted = cards.slice().sort((a, b) => {
+      const sold = Number(a.dataset.sold) - Number(b.dataset.sold);
+      if (sold) return sold;
+      if (state.sort === 'low') return Number(a.dataset.price) - Number(b.dataset.price);
+      if (state.sort === 'high') return Number(b.dataset.price) - Number(a.dataset.price);
+      return Number(b.dataset.created) - Number(a.dataset.created);
+    });
+    let shown = 0;
+    for (const card of sorted) {
+      const ok =
+        (!state.category || card.dataset.category === catName[state.category]) &&
+        (!state.surface || card.dataset.surface === state.surface) &&
+        (state.sold || card.dataset.sold === '0');
+      card.hidden = !ok;
+      if (ok) shown++;
+      grid.appendChild(card);
+    }
+    countEl.textContent = `${shown} ${shown === 1 ? 'piece' : 'pieces'}`;
+    emptyEl.hidden = shown > 0;
+
+    const kind = state.category ? catName[state.category] : '';
+    const surf = state.surface ? surfName[state.surface] : '';
+    heading.textContent = kind && surf ? `${kind} in ${surf}` : kind || surf || 'Shop all';
+
+    const q = new URLSearchParams();
+    if (state.category) q.set('category', state.category);
+    if (state.surface) q.set('surface', state.surface);
+    if (state.sort !== 'new') q.set('sort', state.sort);
+    if (state.sold) q.set('sold', '1');
+    history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+  }
+
+  catBtns.forEach((b) => b.addEventListener('click', () => ((state.category = b.dataset.value ?? ''), render())));
+  surfBtns.forEach((b) =>
+    b.addEventListener('click', () => ((state.surface = state.surface === b.dataset.value ? '' : b.dataset.value!), render())),
+  );
+  sortSel.addEventListener('change', () => ((state.sort = sortSel.value), render()));
+  soldBox.addEventListener('change', () => ((state.sold = soldBox.checked), render()));
+  document.querySelector('[data-reset]')?.addEventListener('click', () => {
+    Object.assign(state, { category: '', surface: '', sold: false });
+    render();
+  });
+  render();
+</script>
+
 <style>
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem 2.5rem;
-    padding-bottom: 2.5rem;
+  .shophead {
+    padding-top: clamp(2rem, 5vw, 3.5rem);
+    padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .crumbs {
+    margin-bottom: 1rem;
+  }
+  .shophead__lede {
+    max-width: 36rem;
+    margin: 1rem 0 0;
+    font-size: 1.05rem;
+    color: var(--stone);
+  }
+  .filters-wrap {
+    position: sticky;
+    top: calc(7.25rem + 1px);
+    z-index: 10;
+    background: var(--cream);
+    border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
-  .filters a:hover {
-    color: var(--ink);
-  }
-  .group {
-    padding: clamp(4rem, 9vw, 7rem) 0 0;
-    scroll-margin-top: 2rem;
-  }
-  .group:last-of-type {
-    padding-bottom: clamp(5rem, 12vw, 10rem);
-  }
-  .group__head {
+  .filters {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 3rem;
+    align-items: center;
+    gap: 1rem 2rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+    flex-wrap: wrap;
+  }
+  .chips,
+  .swatches,
+  .filters__right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .filters__right {
+    gap: 1.25rem;
+  }
+  .chip {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .chip:hover {
+    border-color: var(--ink);
+  }
+  .chip.is-on {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--cream);
+  }
+  .swatch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .swatch-btn .swatch {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+  .swatch-btn__name {
+    display: none;
+  }
+  .swatch-btn:hover {
+    border-color: var(--line);
+  }
+  .swatch-btn[aria-pressed='true'] {
+    border-color: var(--ink);
+    padding-right: 0.75rem;
+  }
+  .swatch-btn[aria-pressed='true'] .swatch-btn__name {
+    display: inline;
+  }
+  .sort select {
+    font: inherit;
+    font-size: 0.88rem;
+    padding: 0.5rem 2rem 0.5rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--cream)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23241f1b'/%3E%3C/svg%3E")
+      no-repeat right 0.85rem center;
+    appearance: none;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .results {
+    padding-bottom: clamp(4rem, 9vw, 7rem);
+  }
+  .results__bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    font-size: 0.9rem;
+    color: var(--stone);
+  }
+  .results__bar p {
+    margin: 0;
+  }
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  .toggle input {
+    accent-color: var(--ink);
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4rem clamp(1.25rem, 2.5vw, 2.5rem);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2.5rem clamp(0.75rem, 1.5vw, 1.25rem);
   }
-  @media (max-width: 960px) {
+  .grid > :global([hidden]) {
+    display: none;
+  }
+  .empty {
+    padding: 3rem 0;
+    text-align: center;
+  }
+  .empty button {
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  @media (max-width: 1100px) {
     .grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
-  @media (max-width: 520px) {
+  @media (max-width: 900px) {
+    .filters-wrap {
+      top: calc(6.5rem + 1px);
+      position: static;
+    }
+    .chips {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      width: 100%;
+      scrollbar-width: none;
+    }
+    .chip {
+      white-space: nowrap;
+    }
+  }
+  @media (max-width: 640px) {
     .grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 2rem 0.75rem;
     }
   }
 </style>

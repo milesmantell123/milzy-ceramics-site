@@ -1,0 +1,129 @@
+---
+import Base from '../layouts/Base.astro';
+import PieceCard from '../components/PieceCard.astro';
+import { surfaces, available, products } from '../data/products';
+
+const rows = surfaces.map((s) => {
+  const pieces = available.filter((p) => p.surface === s.id);
+  return { ...s, pieces: pieces.slice(0, 4), count: pieces.length, hero: pieces[0] ?? products.find((p) => p.surface === s.id) };
+});
+---
+
+<Base
+  title="The Surfaces"
+  description="Seven named surfaces from the soda kiln: Ember, Bone, Char, Ash, Oribe, Cobalt and Tidepool. How each one is made, and every piece available in it."
+>
+  <section class="wrap head">
+    <p class="eyebrow">The palette</p>
+    <h1 class="display">Seven surfaces</h1>
+    <p class="lede">
+      Every pot here starts as the same white flashing stoneware. In the soda kiln, flame and
+      vapour turn bare clay to rust and copper, and a glaze or two settles into the carving. No two
+      come out alike, so instead of colour codes we give the results names.
+    </p>
+    <nav class="jump" aria-label="Surfaces">
+      {rows.map((s) => (
+        <a href={`#${s.id}`}><span class="swatch" style={`background:${s.swatch}`}></span>{s.name}</a>
+      ))}
+    </nav>
+  </section>
+
+  {rows.map((s, i) => (
+    <section id={s.id} class:list={['row', { 'row--alt': i % 2 }]}>
+      <div class="wrap row__inner">
+        <div class="row__text">
+          <span class="row__chip" style={`background:${s.swatch}`}></span>
+          <p class="eyebrow">{s.tagline}</p>
+          <h2 class="display row__name">{s.name}</h2>
+          <p class="row__about">{s.about}</p>
+          <a href={`/collection/?surface=${s.id}`} class="button">
+            {s.count ? `Shop ${s.count} in ${s.name}` : `See ${s.name}`}
+          </a>
+        </div>
+        <div class="row__grid">
+          {s.pieces.map((p) => <PieceCard piece={p} />)}
+        </div>
+      </div>
+    </section>
+  ))}
+</Base>
+
+<style>
+  .head {
+    padding-top: clamp(2.5rem, 6vw, 5rem);
+    padding-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+  .head .eyebrow {
+    margin-bottom: 1rem;
+  }
+  .head .lede {
+    max-width: 42rem;
+    margin-top: 1.5rem;
+  }
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+  .jump a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem 0.5rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.9rem;
+  }
+  .jump a:hover {
+    border-color: var(--ink);
+  }
+  .jump .swatch {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+  .row {
+    padding: clamp(3rem, 7vw, 5.5rem) 0;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 7rem;
+  }
+  .row--alt {
+    background: var(--paper);
+  }
+  .row__inner {
+    display: grid;
+    grid-template-columns: 1fr 2.2fr;
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+  .row__chip {
+    display: block;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    box-shadow: inset 0 0 0 1px rgba(36, 31, 27, 0.15);
+  }
+  .row__name {
+    margin: 0.5rem 0 1rem;
+  }
+  .row__about {
+    font-size: 1.05rem;
+    margin-bottom: 1.75rem;
+  }
+  .row__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+  @media (max-width: 1000px) {
+    .row__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .row__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+</style>

@@ -13,8 +13,7 @@ import PageHead from '../components/PageHead.astro';
   />
 
   <section class="wrap studio">
-    <!-- Replace this panel with a portrait or studio photograph: public/images/studio.jpg -->
-    <div class="studio__image" role="img" aria-label="The Milzy Ceramics studio"></div>
+    <img class="studio__image" src="/images/studio/studio-tilt.jpg" alt="A carved, soda fired cup with a green glazed interior" width="900" height="1125" />
 
     <div class="studio__text prose">
       <p class="lede">
@@ -54,11 +53,11 @@ import PageHead from '../components/PageHead.astro';
   }
   .studio__image {
     aspect-ratio: 4 / 5;
-    background:
-      radial-gradient(ellipse 50% 40% at 60% 70%, rgba(180, 83, 42, 0.6) 0%, transparent 70%),
-      linear-gradient(160deg, #2a2522 0%, #161412 100%);
+    width: 100%;
+    object-fit: cover;
+    border-radius: var(--radius);
     position: sticky;
-    top: 3rem;
+    top: 9rem;
   }
   .studio__text .lede {
     margin-bottom: 2rem;

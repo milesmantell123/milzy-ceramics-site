@@ -1,50 +1,134 @@
 ---
-import Plate from './Plate.astro';
-import { formatPrice, type Product } from '../data/products';
+// A piece in a grid or row: photo (a second photo on hover), name,
+// surface and price.
+import { formatPrice, surfaceById, cover, type Product } from '../data/products';
 
 interface Props {
   piece: Product;
+  eager?: boolean;
 }
-const { piece } = Astro.props;
+const { piece, eager = false } = Astro.props;
+const surface = surfaceById[piece.surface];
+const second = piece.cards[1];
 ---
 
-<a href={`/collection/${piece.slug}/`} class="card">
-  <Plate piece={piece} />
+<a
+  href={`/collection/${piece.slug}/`}
+  class:list={['card', { 'card--sold': piece.sold }]}
+  data-category={piece.category}
+  data-surface={piece.surface}
+  data-price={piece.price}
+  data-created={piece.created}
+  data-sold={piece.sold ? '1' : '0'}
+>
+  <div class="card__media">
+    <img
+      src={cover(piece)}
+      alt={`${piece.name} in ${surface.name}, ${piece.finish.toLowerCase()}`}
+      width="570"
+      height="713"
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+    />
+    {second && <img class="card__alt" src={second} alt="" width="570" height="713" loading="lazy" decoding="async" />}
+    {piece.sold ? <span class="card__badge">Sold</span> : <span class="card__badge card__badge--one">One of one</span>}
+  </div>
   <div class="card__meta">
-    <div>
-      <h3 class="card__name">{piece.name}</h3>
-      <p class="card__finish">{piece.finish}</p>
-    </div>
+    <h3 class="card__name">{piece.name}</h3>
     <p class="card__price">{formatPrice(piece.price)}</p>
   </div>
+  <p class="card__surface">
+    <span class="swatch" style={`background:${surface.swatch}`}></span>
+    {surface.name}
+    <span class="card__finish">&middot; {piece.finish}</span>
+  </p>
 </a>
 
 <style>
   .card {
     display: block;
+    min-width: 0;
   }
-  .card:hover :global(.plate img),
-  .card:hover :global(.plate__art) {
-    transform: scale(1.04);
+  .card__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--sand);
+    border-radius: var(--radius);
+  }
+  .card__media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.45s ease, transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .card__alt {
+    opacity: 0;
+  }
+  @media (hover: hover) {
+    .card:hover .card__alt {
+      opacity: 1;
+    }
+    .card:hover .card__media img {
+      transform: scale(1.03);
+    }
+  }
+  .card__badge {
+    position: absolute;
+    left: 0.6rem;
+    top: 0.6rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--paper);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .card__badge--one {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .card:hover .card__badge--one {
+    opacity: 1;
+  }
+  .card--sold .card__media img {
+    filter: saturate(0.6);
+    opacity: 0.75;
   }
   .card__meta {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: 1rem;
-    padding-top: 1.25rem;
+    padding-top: 0.85rem;
   }
   .card__name {
-    font-size: 1.5rem;
-  }
-  .card__finish {
-    margin: 0.35rem 0 0;
-    font-size: 0.85rem;
-    color: var(--stone);
+    font-size: 1.15rem;
+    font-family: var(--serif);
   }
   .card__price {
     margin: 0;
+    font-size: 0.95rem;
+  }
+  .card--sold .card__price {
+    color: var(--stone);
+    text-decoration: line-through;
+  }
+  .card__surface {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0.3rem 0 0;
     font-size: 0.85rem;
-    letter-spacing: 0.08em;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .card__finish {
+    color: var(--stone);
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>
