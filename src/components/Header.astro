@@ -39,7 +39,7 @@ const count = (slug: string) => available.filter((p) => categories.find((c) => c
       <a href="/studio/" class="hide-sm" aria-current={path.startsWith('/studio') ? 'page' : undefined}>Our Story</a>
     </nav>
 
-    <a href="/" class="wordmark" aria-label="Milzy Ceramics, home"><Mark class="wordmark__mark" />Milzy</a>
+    <a href="/" class="wordmark" aria-label="Milzy Ceramics, home"><Mark class="wordmark__mark" /><span class="wordmark__text">Milzy</span></a>
 
     <div class="header__right">
       <a href="/care/" class="hide-sm">Help</a>
@@ -112,6 +112,12 @@ const count = (slug: string) => available.filter((p) => categories.find((c) => c
       timer = window.setInterval(() => show(at + 1), 6000);
     }),
   );
+
+  // As you scroll down, the name tucks away and the carved MM mark takes its place.
+  const header = document.querySelector<HTMLElement>('.header');
+  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 120);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
 
   // Open and close the Shop menu.
   const toggle = document.querySelector<HTMLButtonElement>('.shop-toggle');
@@ -241,6 +247,33 @@ const count = (slug: string) => available.filter((p) => categories.find((c) => c
     height: 0.8em;
     width: auto;
     transform: translateY(-0.04em);
+  }
+  .wordmark__text {
+    display: inline-block;
+    max-width: 4em;
+    overflow: hidden;
+    transition: max-width 0.5s ease, opacity 0.35s ease, transform 0.5s ease;
+  }
+  .wordmark :global(.wordmark__mark) {
+    transition: height 0.5s ease, color 0.5s ease;
+  }
+  .header.is-scrolled .wordmark__text {
+    max-width: 0;
+    opacity: 0;
+    transform: translateY(-0.3em);
+  }
+  .header.is-scrolled .wordmark {
+    gap: 0;
+  }
+  .header.is-scrolled .wordmark :global(.wordmark__mark) {
+    height: 1.15em;
+    color: var(--rust);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wordmark__text,
+    .wordmark :global(.wordmark__mark) {
+      transition: none;
+    }
   }
   .bag {
     display: inline-flex;
