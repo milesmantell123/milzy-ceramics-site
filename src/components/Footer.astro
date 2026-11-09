@@ -1,111 +1,160 @@
 ---
-import { ETSY_SHOP } from '../data/products';
+import { ETSY_SHOP, categories, surfaces } from '../data/products';
+import Mark from './Mark.astro';
+
+// Paste the signup form address from Buttondown, Kit or Mailchimp here and
+// the newsletter form appears in the footer.
+const NEWSLETTER_ACTION = '';
 const year = new Date().getFullYear();
 ---
 
 <footer class="footer">
   <div class="wrap">
     <div class="footer__top">
-      <div class="footer__brand">
-        <p class="footer__mark">Milzy</p>
-        <p class="footer__line">Soda fired stoneware.<br />Made by hand in Southern California.</p>
+      <div class="footer__signup">
+        <p class="footer__mark"><Mark class="footer__mm" />Milzy</p>
+        <h2 class="footer__head">Hear about the next kiln opening</h2>
+        {NEWSLETTER_ACTION ? (
+          <form class="signup" action={NEWSLETTER_ACTION} method="post" target="_blank">
+            <label class="visually-hidden" for="footer-email">Email address</label>
+            <input id="footer-email" type="email" name="email" placeholder="Email address" required autocomplete="email" />
+            <button class="button button--light" type="submit">Sign up</button>
+          </form>
+        ) : (
+          <p class="footer__note">
+            New pieces arrive after every firing. Favourite the shop on Etsy to be told first.
+          </p>
+          <p>
+            <a href={ETSY_SHOP} rel="noopener" class="button button--light">Follow on Etsy</a>
+          </p>
+        )}
       </div>
 
       <nav class="footer__cols" aria-label="Footer">
         <div>
-          <p class="eyebrow">Collection</p>
-          <a href="/collection/">All pieces</a>
-          <a href="/collection/#vessels">Vessels</a>
-          <a href="/collection/#drinkware">Drinkware</a>
-          <a href="/collection/#lidded-jars">Lidded jars</a>
+          <p class="eyebrow">Shop</p>
+          <a href="/collection/">Shop all</a>
+          {categories.map((c) => <a href={`/collection/?category=${c.slug}`}>{c.name}</a>)}
         </div>
         <div>
-          <p class="eyebrow">Discover</p>
+          <p class="eyebrow">Surfaces</p>
+          {surfaces.map((s) => (
+            <a href={`/collection/?surface=${s.id}`} class="footer__surface">
+              <span class="swatch" style={`background:${s.swatch}`}></span>{s.name}
+            </a>
+          ))}
+        </div>
+        <div>
+          <p class="eyebrow">About</p>
+          <a href="/studio/">Our story</a>
           <a href="/learn/">Learn</a>
-          <a href="/studio/">The studio</a>
-          <a href="/care/">Care and questions</a>
+          <a href="/surfaces/">The surfaces</a>
         </div>
         <div>
-          <p class="eyebrow">Connect</p>
+          <p class="eyebrow">Help</p>
+          <a href="/care/">Care and questions</a>
           <a href="/contact/">Commissions</a>
-          <a href={ETSY_SHOP} rel="noopener">Etsy</a>
+          <a href={ETSY_SHOP} rel="noopener">Etsy shop</a>
         </div>
       </nav>
     </div>
 
-    <hr class="rule" />
     <div class="footer__base">
-      <p>&copy; {year} Milzy Ceramics</p>
-      <p>Every piece is one of one.</p>
+      <p>&copy; {year} Milzy Ceramics &middot; Soda fired stoneware, Southern California</p>
+      <p>Half me, half accident.</p>
     </div>
   </div>
 </footer>
 
 <style>
-  .footer {
-    background: var(--ink);
-    color: var(--ivory);
-    padding: 6rem 0 2.5rem;
+  .footer__mark {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
   }
-  .footer .rule {
-    border-color: #2f2b27;
+  .footer__mark :global(.footer__mm) {
+    height: 0.8em;
+    width: auto;
+  }
+  .footer {
+    background: #1d1a18;
+    color: #e9e1d5;
+    padding: clamp(3.5rem, 7vw, 5.5rem) 0 2rem;
   }
   .footer__top {
     display: grid;
     grid-template-columns: 1fr 1.6fr;
-    gap: 4rem;
-    padding-bottom: 5rem;
+    gap: 3rem 4rem;
+    padding-bottom: 3.5rem;
+    border-bottom: 1px solid #3a342f;
   }
   .footer__mark {
     font-family: var(--serif);
-    font-size: 3.5rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
+    font-size: 2.6rem;
     line-height: 1;
     margin-bottom: 1.5rem;
+    color: var(--paper);
   }
-  .footer__line {
-    color: #a59d92;
-    font-size: 0.95rem;
+  .footer__head {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--paper);
+  }
+  .footer__note {
+    color: #b9afa2;
+    max-width: 26rem;
+  }
+
+  .signup {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 28rem;
+  }
+  .signup input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid #5a524b;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--paper);
+    font: inherit;
   }
   .footer__cols {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
   }
   .footer__cols .eyebrow {
-    color: #8a8279;
-    margin-bottom: 1.25rem;
+    color: #9b9184;
+    margin-bottom: 1rem;
   }
   .footer__cols a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.95rem;
-    margin-bottom: 0.6rem;
-    color: #d9d2c6;
-    transition: color 0.3s ease;
+    margin-bottom: 0.55rem;
+    transition: color 0.2s ease;
   }
   .footer__cols a:hover {
-    color: var(--ivory);
+    color: #f0b48c;
   }
   .footer__base {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
-    padding-top: 2rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #8a8279;
+    padding-top: 1.75rem;
+    font-size: 0.8rem;
+    color: #9b9184;
   }
   .footer__base p {
     margin: 0;
   }
-  @media (max-width: 860px) {
+  @media (max-width: 900px) {
     .footer__top {
       grid-template-columns: 1fr;
     }
-  }
-  @media (max-width: 520px) {
     .footer__cols {
       grid-template-columns: 1fr 1fr;
     }

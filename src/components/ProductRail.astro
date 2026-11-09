@@ -1,0 +1,41 @@
+---
+// A titled, horizontally scrolling row of pieces with arrow buttons.
+import PieceCard from './PieceCard.astro';
+import type { Product } from '../data/products';
+
+interface Props {
+  title: string;
+  pieces: Product[];
+  href?: string;
+  linkLabel?: string;
+}
+const { title, pieces, href, linkLabel = 'Shop all' } = Astro.props;
+---
+
+<section class="wrap" data-rail>
+  <div class="rail-head">
+    <div>
+      <h2 class="title">{title}</h2>
+      <slot />
+    </div>
+    <div class="rail-side">
+      {href && <a href={href} class="link">{linkLabel}</a>}
+      <div class="rail-arrows">
+        <button data-dir="-1" aria-label="Scroll back">&larr;</button>
+        <button data-dir="1" aria-label="Scroll forward">&rarr;</button>
+      </div>
+    </div>
+  </div>
+  <div class="rail">
+    {pieces.map((p) => <PieceCard piece={p} />)}
+  </div>
+</section>
+
+<style>
+  .rail-side {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: none;
+  }
+</style>

@@ -1,175 +1,404 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Plate from '../../components/Plate.astro';
-import PieceCard from '../../components/PieceCard.astro';
-import { products, formatPrice, type Product } from '../../data/products';
+import ProductRail from '../../components/ProductRail.astro';
+import { products, available, formatPrice, surfaceById, categorySlug, cover, type Product } from '../../data/products';
 
 export function getStaticPaths() {
   return products.map((piece) => ({ params: { slug: piece.slug }, props: { piece } }));
 }
 
 const { piece } = Astro.props as { piece: Product };
-const related = products
-  .filter((p) => p.slug !== piece.slug && p.category === piece.category)
-  .concat(products.filter((p) => p.slug !== piece.slug && p.category !== piece.category))
-  .slice(0, 3);
+const surface = surfaceById[piece.surface];
+const others = available.filter((p) => p.slug !== piece.slug);
+const sameSurface = others.filter((p) => p.surface === piece.surface).slice(0, 10);
+const sameKind = others.filter((p) => p.category === piece.category && p.surface !== piece.surface).slice(0, 10);
+
+// Photos: our own copy first (always loads), Etsy's larger copies after.
+const gallery = piece.images.map((src, i) => ({ src, local: piece.cards[i] }));
+const paragraphs = piece.description.split(/\n\n+/);
 
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'Product',
-  name: `${piece.name}, ${piece.finish}`,
+  name: `${piece.name} in ${surface.name}`,
   description: piece.description,
   sku: `MILZY-${piece.number}`,
+  color: piece.finish,
   brand: { '@type': 'Brand', name: 'Milzy Ceramics' },
   material: 'Stoneware',
-  ...(piece.image ? { image: new URL(piece.image, Astro.site).href } : {}),
+  image: [new URL(cover(piece), Astro.site).href, ...piece.images],
   offers: {
     '@type': 'Offer',
     price: piece.price.toFixed(2),
     priceCurrency: 'USD',
-    availability: 'https://schema.org/InStock',
+    availability: piece.sold ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
     url: piece.etsy,
   },
 };
 ---
 
 <Base
-  title={`${piece.name}, ${piece.finish}`}
-  description={`${piece.description} Soda fired stoneware, handmade in Southern California. ${formatPrice(piece.price)}.`}
-  image={piece.image}
+  title={`${piece.name} in ${surface.name}, ${piece.finish}`}
+  description={`${paragraphs[0]} Soda fired stoneware, handmade in Southern California. ${formatPrice(piece.price)}.`}
+  image={cover(piece)}
   schema={schema}
 >
   <article class="wrap piece">
-    <div class="piece__media">
-      <Plate piece={piece} eager />
+    <div class="gallery">
+      <div class="gallery__main">
+        {gallery.map((g, i) => (
+          <img
+            src={g.local ?? g.src}
+            srcset={g.local ? `${g.local} 570w, ${g.src} 1080w` : undefined}
+            sizes="(max-width: 900px) 100vw, 58vw"
+            alt={`${piece.name} in ${surface.name}, photo ${i + 1} of ${gallery.length}`}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            fetchpriority={i === 0 ? 'high' : 'auto'}
+            width="1080"
+            height="1350"
+            data-slide={i}
+          />
+        ))}
+      </div>
+      {gallery.length > 1 && (
+        <div class="gallery__thumbs" aria-label="Photos">
+          {gallery.map((g, i) => (
+            <button data-goto={i} aria-label={`Show photo ${i + 1}`} class:list={{ 'is-on': i === 0 }}>
+              <img src={g.local ?? g.src.replace('il_1080xN', 'il_340x270')} alt="" loading="lazy" width="120" height="150" />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
 
-    <div class="piece__info">
-      <a href="/collection/" class="eyebrow back">&larr; The collection</a>
-      <p class="eyebrow">No. {piece.number} &middot; {piece.category}</p>
-      <h1 class="title">{piece.name}</h1>
-      <p class="piece__finish">{piece.finish}</p>
-      <p class="piece__price">{formatPrice(piece.price)}</p>
-
-      <p class="piece__desc">{piece.description}</p>
-
-      <a href={piece.etsy} class="button button--solid" rel="noopener">Acquire this piece</a>
-      <p class="piece__note">Purchase is completed securely through our Etsy studio.</p>
-
-      <dl class="details">
-        <div><dt>Material</dt><dd>Wheel-thrown stoneware</dd></div>
-        <div><dt>Firing</dt><dd>Soda fired to cone 10</dd></div>
-        <div><dt>Edition</dt><dd>One of one</dd></div>
-        <div><dt>Made in</dt><dd>Southern California</dd></div>
-      </dl>
-
-      <p class="piece__more">
-        <a href="/care/" class="link">Care</a>
-        <a href="/learn/soda-firing/" class="link">About soda firing</a>
+    <div class="info">
+      <p class="eyebrow crumbs">
+        <a href="/collection/">Shop</a> / <a href={`/collection/?category=${categorySlug(piece.category)}`}>{piece.category}</a>
       </p>
+      <h1 class="info__name">{piece.name} <em>in {surface.name}</em></h1>
+      <p class="info__price">
+        {formatPrice(piece.price)}
+        {piece.sold && <span class="sold">Sold</span>}
+      </p>
+
+      <div class="info__surface">
+        <p class="eyebrow">Surface</p>
+        <a href={`/collection/?surface=${surface.id}`} class="surface-pill">
+          <span class="swatch" style={`background:${surface.swatch}`}></span>
+          <strong>{surface.name}</strong>
+          <span>{piece.finish}</span>
+        </a>
+      </div>
+
+      {piece.sold ? (
+        <a href={`/collection/?surface=${surface.id}`} class="button button--solid buy">Shop more in {surface.name}</a>
+      ) : (
+        <a href={piece.etsy} class="button button--solid buy" rel="noopener">Buy on Etsy &middot; {formatPrice(piece.price)}</a>
+      )}
+      <ul class="promises">
+        <li>One of one: you receive the exact piece photographed</li>
+        <li>Packed carefully and shipped with tracking</li>
+        <li>Checkout is handled securely by Etsy</li>
+      </ul>
+
+      <div class="info__desc">
+        {paragraphs.map((p) => <p>{p}</p>)}
+      </div>
+
+      <div class="accordions">
+        <details open>
+          <summary>Details</summary>
+          <dl class="specs">
+            {piece.size && <div><dt>Size</dt><dd>{piece.size}</dd></div>}
+            {piece.interior && <div><dt>Glaze</dt><dd>{piece.interior}</dd></div>}
+            <div><dt>Clay</dt><dd>White flashing stoneware</dd></div>
+            <div><dt>Firing</dt><dd>Soda fired to cone 10</dd></div>
+            <div><dt>Made in</dt><dd>Southern California</dd></div>
+            <div><dt>Signed</dt><dd>MM carved by hand into the foot</dd></div>
+            <div><dt>Piece</dt><dd>No. {piece.number}</dd></div>
+          </dl>
+        </details>
+        <details>
+          <summary>Care</summary>
+          <p>{piece.care}</p>
+          <p><a href="/care/" class="link">Care and questions</a></p>
+        </details>
+        <details>
+          <summary>About {surface.name}</summary>
+          <p>{surface.about}</p>
+          <p><a href="/surfaces/" class="link">Meet all seven surfaces</a></p>
+        </details>
+        <details>
+          <summary>Why every piece is different</summary>
+          <p>
+            Soda ash is introduced into the kiln at peak temperature, where it vaporises and lands on
+            the pots. Where the flame touched, the clay flashes orange and rust. No two pieces leave
+            the kiln the same.
+          </p>
+          <p><a href="/learn/soda-firing/" class="link">Read about soda firing</a></p>
+        </details>
+      </div>
     </div>
   </article>
 
-  <section class="section related">
-    <div class="wrap">
-      <h2 class="title">You may also consider</h2>
-      <div class="related__grid">
-        {related.map((p) => <PieceCard piece={p} />)}
-      </div>
-    </div>
-  </section>
+  {sameSurface.length > 0 && (
+    <section class="section more">
+      <ProductRail title={`More in ${surface.name}`} pieces={sameSurface} href={`/collection/?surface=${surface.id}`} />
+    </section>
+  )}
+  {sameKind.length > 0 && (
+    <section class="section more more--last">
+      <ProductRail title={`More ${piece.category.toLowerCase()}`} pieces={sameKind} href={`/collection/?category=${categorySlug(piece.category)}`} />
+    </section>
+  )}
 </Base>
+
+<script>
+  const slides = Array.from(document.querySelectorAll<HTMLElement>('[data-slide]'));
+  const thumbs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-goto]'));
+  const main = document.querySelector<HTMLElement>('.gallery__main');
+  thumbs.forEach((t) =>
+    t.addEventListener('click', () => {
+      const i = Number(t.dataset.goto);
+      main?.scrollTo({ left: slides[i].offsetLeft - main.offsetLeft, behavior: 'smooth' });
+      thumbs.forEach((x) => x.classList.toggle('is-on', x === t));
+    }),
+  );
+  main?.addEventListener(
+    'scroll',
+    () => {
+      const i = Math.round(main.scrollLeft / main.clientWidth);
+      thumbs.forEach((x, j) => x.classList.toggle('is-on', j === i));
+    },
+    { passive: true },
+  );
+</script>
 
 <style>
   .piece {
     display: grid;
-    grid-template-columns: 1.25fr 1fr;
-    gap: clamp(2.5rem, 7vw, 7rem);
-    padding-top: clamp(8rem, 12vw, 10rem);
-    padding-bottom: clamp(4rem, 8vw, 7rem);
+    grid-template-columns: 1.35fr 1fr;
+    gap: clamp(2rem, 5vw, 5rem);
+    padding-top: clamp(1.5rem, 3vw, 2.5rem);
+    padding-bottom: clamp(3rem, 6vw, 5rem);
     align-items: start;
   }
-  .piece__info {
+  .gallery {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 1rem;
     position: sticky;
-    top: 3rem;
-    padding-top: 2rem;
+    top: 8.5rem;
   }
-  .back {
-    display: inline-block;
-    margin-bottom: 3rem;
+  .gallery__main {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    border-radius: var(--radius);
+    background: var(--sand);
   }
-  .piece__info > .eyebrow:not(.back) {
-    margin-bottom: 1.25rem;
+  .gallery__main::-webkit-scrollbar {
+    display: none;
   }
-  .piece__finish {
-    font-family: var(--serif);
+  .gallery__main img {
+    flex: 0 0 100%;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    scroll-snap-align: start;
+  }
+  .gallery__thumbs {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .gallery__thumbs button {
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--sand);
+    cursor: pointer;
+    opacity: 0.65;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+  }
+  .gallery__thumbs button.is-on,
+  .gallery__thumbs button:hover {
+    opacity: 1;
+    border-color: var(--ink);
+  }
+  .gallery__thumbs img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .crumbs {
+    margin-bottom: 1rem;
+  }
+  .crumbs a:hover {
+    color: var(--ink);
+  }
+  .info__name {
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+  }
+  .info__name em {
+    display: block;
     font-style: italic;
-    font-size: 1.4rem;
-    margin: 0.75rem 0 1.5rem;
+    font-weight: 300;
+    color: var(--stone);
+    font-size: 0.62em;
+    margin-top: 0.2rem;
+  }
+  .info__price {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    margin: 0.6rem 0 1.75rem;
+  }
+  .sold {
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--cream);
+    font-size: 0.75rem;
+  }
+  .info__surface .eyebrow {
+    margin-bottom: 0.6rem;
+  }
+  .surface-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem 0.6rem 0.7rem;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    font-size: 0.92rem;
+  }
+  .surface-pill .swatch {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+  .surface-pill strong {
+    font-weight: 500;
+  }
+  .surface-pill span:last-child {
     color: var(--stone);
   }
-  .piece__price {
-    font-size: 1.05rem;
-    letter-spacing: 0.08em;
-    margin-bottom: 2.5rem;
+  .buy {
+    width: 100%;
+    margin-top: 1.75rem;
+    padding: 1.15rem 1.5rem;
+    font-size: 1rem;
   }
-  .piece__desc {
-    margin-bottom: 2.5rem;
-    max-width: 30rem;
-  }
-  .piece__note {
-    font-size: 0.8rem;
+  .promises {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 2rem;
+    font-size: 0.88rem;
     color: var(--stone);
-    margin: 1rem 0 3rem;
   }
-  .details {
-    margin: 0 0 2.5rem;
+  .promises li {
+    padding-left: 1.4rem;
+    position: relative;
+    margin-bottom: 0.35rem;
+  }
+  .promises li::before {
+    content: '';
+    position: absolute;
+    left: 0.2rem;
+    top: 0.5em;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--rust);
+  }
+  .info__desc {
+    font-size: 1.02rem;
+    margin-bottom: 1.5rem;
+  }
+  .accordions details {
     border-top: 1px solid var(--line);
   }
-  .details div {
+  .accordions details:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .accordions summary {
     display: flex;
     justify-content: space-between;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--line);
-    font-size: 0.9rem;
+    padding: 1.1rem 0;
+    cursor: pointer;
+    font-weight: 500;
+    list-style: none;
   }
-  .details dt {
+  .accordions summary::-webkit-details-marker {
+    display: none;
+  }
+  .accordions summary::after {
+    content: '+';
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+  .accordions details[open] summary::after {
+    content: '\2212';
+  }
+  .accordions details > p,
+  .accordions details > dl {
+    margin: 0 0 1.25rem;
     color: var(--stone);
   }
-  .details dd {
+  .specs div {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: 1rem;
+    padding: 0.35rem 0;
+    font-size: 0.92rem;
+  }
+  .specs dt {
+    color: var(--ink);
+  }
+  .specs dd {
     margin: 0;
   }
-  .piece__more {
-    display: flex;
-    gap: 2rem;
-  }
-  .related {
+  .more {
     border-top: 1px solid var(--line);
   }
-  .related .title {
-    margin-bottom: 3.5rem;
+  .more--last {
+    padding-top: 0;
+    border-top: 0;
   }
-  .related__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(1.25rem, 2.5vw, 2.5rem);
-  }
-  @media (max-width: 860px) {
+
+  @media (max-width: 900px) {
     .piece {
       grid-template-columns: 1fr;
-    }
-    .piece__info {
-      position: static;
       padding-top: 0;
     }
-    .back {
-      margin-bottom: 2rem;
+    .piece > .gallery {
+      margin: 0 calc(-1 * var(--gutter));
     }
-    .related__grid {
-      grid-template-columns: 1fr 1fr;
+    .gallery {
+      position: static;
+      grid-template-columns: 1fr;
     }
-    .related__grid > :global(:nth-child(3)) {
-      display: none;
+    .gallery__main {
+      grid-column: 1;
+      border-radius: 0;
+    }
+    .gallery__thumbs {
+      grid-column: 1;
+      grid-row: 2;
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 0 var(--gutter);
+    }
+    .gallery__thumbs button {
+      flex: 0 0 3.5rem;
     }
   }
 </style>

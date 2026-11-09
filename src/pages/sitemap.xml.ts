@@ -6,6 +6,7 @@ export const GET: APIRoute = ({ site }) => {
   const paths = [
     '/',
     '/collection/',
+    '/surfaces/',
     ...products.map((p) => `/collection/${p.slug}/`),
     '/learn/',
     ...articles.map((a) => `/learn/${a.slug}/`),
